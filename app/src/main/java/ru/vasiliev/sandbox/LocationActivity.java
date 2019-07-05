@@ -9,12 +9,12 @@ import android.widget.TextView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import ru.vasiliev.sandbox.location.LocationBaseActivity;
+import ru.vasiliev.sandbox.location.BaseLocationActivity;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
-public class LocationActivity extends LocationBaseActivity {
+public class LocationActivity extends BaseLocationActivity {
 
     @BindView(R.id.output_last_location)
     TextView mOutputLastLocation;
@@ -47,7 +47,7 @@ public class LocationActivity extends LocationBaseActivity {
         ButterKnife.bind(this);
 
         mLastLocationButton.setOnClickListener(v -> {
-            if (isLocationMonitorRunning()) {
+            if (isLocationRequestingRunning()) {
                 mOutputLastLocation.setText("Requesting location...");
                 getLastLocation().subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread()).subscribe(
@@ -62,7 +62,7 @@ public class LocationActivity extends LocationBaseActivity {
         });
 
         mLocationButton.setOnClickListener(v -> {
-            if (isLocationMonitorRunning()) {
+            if (isLocationRequestingRunning()) {
                 mOutputLocation.setText("Requesting location...");
                 getLocation().subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                         .subscribe(location -> {
@@ -78,7 +78,7 @@ public class LocationActivity extends LocationBaseActivity {
         });
 
         mLocationsHistoryButton.setOnClickListener(v -> {
-            if (isLocationMonitorRunning()) {
+            if (isLocationRequestingRunning()) {
                 mOutputLocationHistory.setText("Requesting location...");
                 getLocationHistory().subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread()).take(1).subscribe(location -> {

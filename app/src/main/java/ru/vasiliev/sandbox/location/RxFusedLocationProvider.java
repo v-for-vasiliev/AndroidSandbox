@@ -14,14 +14,18 @@ import android.location.Location;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 
+import java.util.concurrent.TimeUnit;
+
 import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 import rx.subjects.ReplaySubject;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 /**
- * Precondition: user must allow location permission request. See {@link LocationBaseActivity}
+ * Precondition: user must allow location permission request. See {@link BaseLocationActivity}
  *
  * Fused location provider uses all available sources. Sources choose strategy based on priority
  * (Ex. {@link LocationRequest#PRIORITY_HIGH_ACCURACY}). Location updates comes every ~10 min., so
@@ -42,8 +46,6 @@ public class RxFusedLocationProvider implements RxLocationProvider {
 
     private LocationRequest mLocationRequest;
 
-    private CompositeSubscription mSubscriptions = new CompositeSubscription();
-
     private PublishSubject<Location> mResultPublisher = PublishSubject.create();
 
     private ReplaySubject<Location> mResultHistoryPublisher = ReplaySubject.create();
@@ -58,8 +60,15 @@ public class RxFusedLocationProvider implements RxLocationProvider {
 
     private boolean mRequestingUpdates = false;
 
+    private CompositeSubscription mTrackingSubscriptions = new CompositeSubscription();
+
+    private boolean mTracking = false;
+
     private RxFusedLocationProvider(Context context, long updateInterval,
             long fastestUpdateInterval, int priority, RxLocationCallback callback) {
+        Timber.d("constructor() {updateInterval=%d, fastestUpdateInterval=%d, "
+                        + "priority=%d, hasCallback=%b}", updateInterval, fastestUpdateInterval, priority,
+                (callback != null));
         mContext = context;
         mUpdateIntervalInMilliseconds = updateInterval;
         mFastestUpdateIntervalInMilliseconds = fastestUpdateInterval;
@@ -69,7 +78,20 @@ public class RxFusedLocationProvider implements RxLocationProvider {
 
 
     @Override
+    public void setCallback(RxLocationCallback callback) {
+        Timber.d("setCallback() = " + callback);
+        mRxLocationCallback = callback;
+    }
+
+    @Override
+    public void removeCallback() {
+        Timber.d("removeCallback()");
+        mRxLocationCallback = null;
+    }
+
+    @Override
     public void start() {
+        Timber.d("start()");
         if (!isInited()) {
             init();
         }
@@ -79,9 +101,8 @@ public class RxFusedLocationProvider implements RxLocationProvider {
     @Override
     public void stop() {
         if (isInited()) {
-            if (!mSubscriptions.hasSubscriptions()) {
-                mSubscriptions.unsubscribe();
-            }
+            Timber.d("stop()");
+            stopTracking();
             mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback)
                     .addOnCompleteListener(task -> {
                         mRequestingUpdates = false;
@@ -107,13 +128,19 @@ public class RxFusedLocationProvider implements RxLocationProvider {
                 .addOnSuccessListener(location -> {
                     // Got last known location. In some rare situations this can be null.
                     if (location != null) {
+                        Timber.d("getLastKnownLocation() {" + location.getLatitude() + ": "
+                                + location.getLongitude() + "; Accuracy: " + location.getAccuracy()
+                                + "}");
                         subscriber.onNext(location);
                         subscriber.onCompleted();
                     } else {
+                        Timber.d("getLastKnownLocation() = null");
                         subscriber.onError(new RuntimeException("No last location"));
                     }
-                }).addOnFailureListener(
-                        command -> subscriber.onError(new RuntimeException("No last location"))));
+                }).addOnFailureListener(command -> {
+                    Timber.d("getLastKnownLocation() = null");
+                    subscriber.onError(new RuntimeException("No last location"));
+                }));
     }
 
     @Override
@@ -129,7 +156,39 @@ public class RxFusedLocationProvider implements RxLocationProvider {
         return mResultHistoryPublisher.asObservable();
     }
 
+    @Override
+    public void startTracking() {
+        if (!mTracking) {
+            Timber.d("startTracking()");
+            mTracking = true;
+            mTrackingSubscriptions
+                    .add(Observable.interval(0, TRACKING_INTERVAL_SECONDS, TimeUnit.SECONDS)
+                            .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(tick -> sendDsaLocation(), e -> {
+                                mTracking = false;
+                                Timber.e("", e);
+                            }, () -> Timber.d("Tracking stopped")));
+        }
+    }
+
+    @Override
+    public void stopTracking() {
+        if (mTracking) {
+            Timber.d("stopTracking()");
+            if (mTrackingSubscriptions.hasSubscriptions()) {
+                mTrackingSubscriptions.clear();
+            }
+            mTracking = false;
+        }
+    }
+
+    @Override
+    public boolean isTracking() {
+        return mTracking;
+    }
+
     private void init() {
+        Timber.d("init()");
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(mContext);
         mLocationRequest = createLocationRequest();
         mSettingsClient = LocationServices.getSettingsClient(mContext);
@@ -142,7 +201,7 @@ public class RxFusedLocationProvider implements RxLocationProvider {
                 if (lastLocation != null) {
                     pushNewLocation(lastLocation);
                 } else {
-                    Timber.d("UPD: no location");
+                    Timber.d("onLocationResult() = null");
                 }
             }
         };
@@ -171,25 +230,41 @@ public class RxFusedLocationProvider implements RxLocationProvider {
     @SuppressLint("MissingPermission")
     private void requestLocationUpdates() {
         if (!mRequestingUpdates) {
+            Timber.d("requestLocationUpdates()");
             mRequestingUpdates = true;
             mSettingsClient.checkLocationSettings(mLocationSettingsRequest).addOnSuccessListener(
                     locationSettingsResponse -> mFusedLocationProviderClient
                             .requestLocationUpdates(mLocationRequest, mLocationCallback,
                                     Looper.myLooper())).addOnFailureListener(e -> {
                 mRequestingUpdates = false;
-                mRxLocationCallback.onLocationSettingsError(e);
+                if (mRxLocationCallback != null) {
+                    mRxLocationCallback.onLocationSettingsError(e);
+                }
             });
         }
     }
 
     private void pushNewLocation(@NonNull Location location) {
-        Timber.d("UPD: " + location.getLatitude() + ": " + location.getLongitude() + "; Accuracy: "
-                + location.getAccuracy());
+        Timber.d("onLocationChanged() {" + location.getLatitude() + ": " + location.getLongitude()
+                + "; Accuracy: " + location.getAccuracy() + "}");
         mResultPublisher.onNext(location);
         mResultHistoryPublisher.onNext(location);
         if (mRxLocationCallback != null) {
             mRxLocationCallback.onLocationChange(location);
         }
+    }
+
+    @SuppressLint("MissingPermission")
+    private void sendDsaLocation() {
+        mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(location -> {
+            if (location != null) {
+                // Send location to server (mTrackingSubscriptions)
+                Timber.d("sendDsaLocation() {" + location.getLatitude() + ": " + location
+                        .getLongitude() + "; Accuracy: " + location.getAccuracy() + "}");
+            } else {
+                Timber.d("sendDsaLocation() skipped, no location");
+            }
+        }).addOnFailureListener(command -> Timber.d("sendDsaLocation() skipped, no location"));
     }
 
     public static class Builder {

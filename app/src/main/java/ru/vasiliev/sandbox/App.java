@@ -8,16 +8,16 @@ public class App extends Application {
 
     private static App sInstance;
 
+    public static App getInstance() {
+        return sInstance;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
         sInstance = this;
 
         init();
-    }
-
-    public static App getInstance() {
-        return sInstance;
     }
 
     private void init() {

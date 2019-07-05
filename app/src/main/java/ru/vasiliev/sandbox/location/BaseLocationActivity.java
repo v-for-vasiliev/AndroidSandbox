@@ -9,6 +9,8 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
+import com.arellomobile.mvp.MvpAppCompatActivity;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.IntentSender;
@@ -20,28 +22,27 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 
 import rx.Observable;
 
 import static ru.vasiliev.sandbox.location.RxLocationProvider.PROVIDER_TYPE_FUSED;
 import static ru.vasiliev.sandbox.location.RxLocationProvider.PROVIDER_TYPE_LEGACY;
 
-public abstract class LocationBaseActivity extends AppCompatActivity
+public abstract class BaseLocationActivity extends MvpAppCompatActivity
         implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         RxLocationCallback {
 
     public static final int REQUEST_CODE_LOCATION_SETTINGS = 1000;
 
+    public static final String KEY_PROVIDER_TYPE = "key_provider_type";
+
     private static final int REQUEST_CODE_LOCATION = 100;
 
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 200;
 
-    public static final String KEY_PROVIDER_TYPE = "key_provider_type";
-
     private GoogleApiClient mGoogleApiClient;
 
-    RxLocationProvider mRxLocationProvider;
+    private RxLocationProvider mRxLocationProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,12 +56,12 @@ public abstract class LocationBaseActivity extends AppCompatActivity
         int providerType = getIntent().getIntExtra(KEY_PROVIDER_TYPE, PROVIDER_TYPE_LEGACY);
         if (providerType == PROVIDER_TYPE_FUSED) {
             mRxLocationProvider = new RxFusedLocationProvider.Builder()
-                    .context(LocationBaseActivity.this).callback(this)
+                    .context(BaseLocationActivity.this).callback(this)
                     .updateIntervalMilliseconds(5000).fastestIntervalMilliseconds(2500)
                     .priority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY).build();
         } else {
             mRxLocationProvider = new RxLegacyLocationProvider.Builder()
-                    .context(LocationBaseActivity.this).provider(LocationManager.NETWORK_PROVIDER)
+                    .context(BaseLocationActivity.this).provider(LocationManager.NETWORK_PROVIDER)
                     .callback(this).updateIntervalMilliseconds(5000)
                     .fastestIntervalMilliseconds(2500)
                     .priority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY).build();
@@ -70,6 +71,7 @@ public abstract class LocationBaseActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        mRxLocationProvider.setCallback(this);
         if (!checkPlayServices()) {
             // Need to install Google Play Services to use the App properly
             onPlayServicesUnresolvableError();
@@ -81,10 +83,12 @@ public abstract class LocationBaseActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
+        mRxLocationProvider.removeCallback();
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
         }
-        stopMonitor();
+        // Do not stop updates if provider acts like a background service
+        //stopLocationUpdates();
     }
 
     @Override
@@ -103,7 +107,7 @@ public abstract class LocationBaseActivity extends AppCompatActivity
             case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                 try {
                     ResolvableApiException rae = (ResolvableApiException) e;
-                    rae.startResolutionForResult(LocationBaseActivity.this,
+                    rae.startResolutionForResult(BaseLocationActivity.this,
                             REQUEST_CODE_LOCATION_SETTINGS);
                 } catch (IntentSender.SendIntentException sie) {
                     onLocationSettingsUnresolvableError(sie);
@@ -147,7 +151,7 @@ public abstract class LocationBaseActivity extends AppCompatActivity
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Permission was granted
-                    startMonitor();
+                    startLocationUpdates();
                 } else {
                     // Permission denied, boo! Disable the
                     // functionality that depends on this permission.
@@ -159,13 +163,13 @@ public abstract class LocationBaseActivity extends AppCompatActivity
         }
     }
 
-    private void startMonitor() {
+    private void startLocationUpdates() {
         if (!mRxLocationProvider.isRequestingUpdates()) {
             mRxLocationProvider.start();
         }
     }
 
-    private void stopMonitor() {
+    private void stopLocationUpdates() {
         mRxLocationProvider.stop();
     }
 
@@ -195,11 +199,11 @@ public abstract class LocationBaseActivity extends AppCompatActivity
             }
         } else {
             // Permission has already been granted
-            startMonitor();
+            startLocationUpdates();
         }
     }
 
-    public boolean isLocationMonitorRunning() {
+    public boolean isLocationRequestingRunning() {
         return mRxLocationProvider.isRequestingUpdates();
     }
 
@@ -225,5 +229,9 @@ public abstract class LocationBaseActivity extends AppCompatActivity
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         onPlayServicesUnresolvableError();
         // Failed to connect to Play Services
+    }
+
+    public RxLocationProvider getRxLocationProvider() {
+        return mRxLocationProvider;
     }
 }

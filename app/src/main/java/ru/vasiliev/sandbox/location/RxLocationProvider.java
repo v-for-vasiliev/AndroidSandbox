@@ -10,6 +10,12 @@ public interface RxLocationProvider {
 
     int PROVIDER_TYPE_FUSED = 2;
 
+    int TRACKING_INTERVAL_SECONDS = 60; // 1 minute
+
+    void setCallback(RxLocationCallback callback);
+
+    void removeCallback();
+
     void start();
 
     void stop();
@@ -21,4 +27,10 @@ public interface RxLocationProvider {
     Observable<Location> getLocationObservable();
 
     Observable<Location> getLocationHistoryObservable();
+
+    void startTracking();
+
+    void stopTracking();
+
+    boolean isTracking();
 }

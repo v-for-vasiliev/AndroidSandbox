@@ -8,7 +8,8 @@ import android.support.v7.widget.Toolbar;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static ru.vasiliev.sandbox.location.LocationBaseActivity.KEY_PROVIDER_TYPE;
+import static ru.vasiliev.sandbox.location.BaseLocationActivity.KEY_PROVIDER_TYPE;
+import static ru.vasiliev.sandbox.location.RxLocationProvider.PROVIDER_TYPE_FUSED;
 import static ru.vasiliev.sandbox.location.RxLocationProvider.PROVIDER_TYPE_LEGACY;
 
 public class MainActivity extends AppCompatActivity {
@@ -16,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
     @OnClick(R.id.location)
     void onLocationClick() {
         Intent intent = new Intent(MainActivity.this, LocationActivity.class);
-        intent.putExtra(KEY_PROVIDER_TYPE, PROVIDER_TYPE_LEGACY);
+        intent.putExtra(KEY_PROVIDER_TYPE, PROVIDER_TYPE_FUSED);
         startActivity(intent);
     }
 

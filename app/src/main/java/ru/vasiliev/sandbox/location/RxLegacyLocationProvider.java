@@ -13,14 +13,18 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
+import java.util.concurrent.TimeUnit;
+
 import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 import rx.subjects.ReplaySubject;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 /**
- * Precondition: user must allow location permission request. See {@link LocationBaseActivity}
+ * Precondition: user must allow location permission request. See {@link BaseLocationActivity}
  */
 public class RxLegacyLocationProvider implements RxLocationProvider {
 
@@ -38,8 +42,6 @@ public class RxLegacyLocationProvider implements RxLocationProvider {
 
     private LocationRequest mLocationRequest;
 
-    private CompositeSubscription mSubscriptions = new CompositeSubscription();
-
     private PublishSubject<Location> mResultPublisher = PublishSubject.create();
 
     private ReplaySubject<Location> mResultHistoryPublisher = ReplaySubject.create();
@@ -54,8 +56,15 @@ public class RxLegacyLocationProvider implements RxLocationProvider {
 
     private boolean mRequestingUpdates = false;
 
+    private CompositeSubscription mTrackingSubscriptions = new CompositeSubscription();
+
+    private boolean mTracking = false;
+
     private RxLegacyLocationProvider(Context context, String provider, long updateInterval,
             long fastestUpdateInterval, int priority, RxLocationCallback callback) {
+        Timber.d("constructor() {provider=%s, updateInterval=%d, "
+                        + "fastestUpdateInterval=%d, priority=%d, hasCallback=%b}", provider,
+                updateInterval, fastestUpdateInterval, priority, (callback != null));
         mContext = context;
         mProvider = provider;
         mUpdateIntervalInMilliseconds = updateInterval;
@@ -65,7 +74,20 @@ public class RxLegacyLocationProvider implements RxLocationProvider {
     }
 
     @Override
+    public void setCallback(RxLocationCallback callback) {
+        Timber.d("setCallback() = " + callback);
+        mRxLocationCallback = callback;
+    }
+
+    @Override
+    public void removeCallback() {
+        Timber.d("removeCallback()");
+        mRxLocationCallback = null;
+    }
+
+    @Override
     public void start() {
+        Timber.d("start()");
         if (!isInited()) {
             init();
         }
@@ -75,9 +97,8 @@ public class RxLegacyLocationProvider implements RxLocationProvider {
     @Override
     public void stop() {
         if (isInited()) {
-            if (!mSubscriptions.hasSubscriptions()) {
-                mSubscriptions.unsubscribe();
-            }
+            Timber.d("stop()");
+            stopTracking();
             mLegacyLocationManager.removeUpdates(mLegacyLocationListener);
             mRequestingUpdates = false;
             mLegacyLocationManager = null;
@@ -94,15 +115,18 @@ public class RxLegacyLocationProvider implements RxLocationProvider {
         return mRequestingUpdates;
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public Observable<Location> getLastKnownLocation() {
         return Observable.create(subscriber -> {
-            @SuppressLint("MissingPermission") Location location = mLegacyLocationManager
-                    .getLastKnownLocation(mProvider);
+            Location location = mLegacyLocationManager.getLastKnownLocation(mProvider);
             if (location != null) {
+                Timber.d("getLastKnownLocation() {" + location.getLatitude() + ": " + location
+                        .getLongitude() + "; Accuracy: " + location.getAccuracy() + "}");
                 subscriber.onNext(location);
                 subscriber.onCompleted();
             } else {
+                Timber.d("getLastKnownLocation() = null");
                 subscriber.onError(new RuntimeException("No last location"));
             }
         });
@@ -121,7 +145,38 @@ public class RxLegacyLocationProvider implements RxLocationProvider {
         return mResultHistoryPublisher.asObservable();
     }
 
+    @Override
+    public void startTracking() {
+        if (!mTracking) {
+            mTracking = true;
+            mTrackingSubscriptions
+                    .add(Observable.interval(0, TRACKING_INTERVAL_SECONDS, TimeUnit.SECONDS)
+                            .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(tick -> sendDsaLocation(), e -> {
+                                mTracking = false;
+                                Timber.e("", e);
+                            }, () -> Timber.d("Tracking stopped")));
+        }
+    }
+
+    @Override
+    public void stopTracking() {
+        if (mTracking) {
+            Timber.d("stopTracking()");
+            if (mTrackingSubscriptions.hasSubscriptions()) {
+                mTrackingSubscriptions.clear();
+            }
+            mTracking = false;
+        }
+    }
+
+    @Override
+    public boolean isTracking() {
+        return mTracking;
+    }
+
     private void init() {
+        Timber.d("init()");
         mLegacyLocationManager = (LocationManager) mContext
                 .getSystemService(Context.LOCATION_SERVICE);
         mLocationRequest = createLocationRequest();
@@ -133,18 +188,20 @@ public class RxLegacyLocationProvider implements RxLocationProvider {
                 if (location != null) {
                     pushNewLocation(location);
                 } else {
-                    Timber.d("UPD: no location");
+                    Timber.d("onLocationChanged() = null");
                 }
             }
 
             @Override
             public void onStatusChanged(String provider, int status, Bundle extras) {
-
+                Timber.d("onStatusChanged() {provider=%s, status=%d, extras={%s}}", provider,
+                        status, extras);
             }
 
             @SuppressLint("MissingPermission")
             @Override
             public void onProviderEnabled(String provider) {
+                Timber.d("onProviderEnabled() {provider=%s}", provider);
                 Location location = mLegacyLocationManager.getLastKnownLocation(provider);
                 if (location != null) {
                     pushNewLocation(location);
@@ -153,7 +210,7 @@ public class RxLegacyLocationProvider implements RxLocationProvider {
 
             @Override
             public void onProviderDisabled(String provider) {
-
+                Timber.d("onProviderDisabled() {provider=%s}", provider);
             }
         };
     }
@@ -181,24 +238,39 @@ public class RxLegacyLocationProvider implements RxLocationProvider {
     @SuppressLint("MissingPermission")
     private void requestLocationUpdates() {
         if (!mRequestingUpdates) {
+            Timber.d("requestLocationUpdates()");
             mRequestingUpdates = true;
             mSettingsClient.checkLocationSettings(mLocationSettingsRequest).addOnSuccessListener(
                     locationSettingsResponse -> mLegacyLocationManager
                             .requestLocationUpdates(mProvider, mFastestUpdateIntervalInMilliseconds,
                                     0.0f, mLegacyLocationListener)).addOnFailureListener(e -> {
                 mRequestingUpdates = false;
-                mRxLocationCallback.onLocationSettingsError(e);
+                if (mRxLocationCallback != null) {
+                    mRxLocationCallback.onLocationSettingsError(e);
+                }
             });
         }
     }
 
     private void pushNewLocation(@NonNull Location location) {
-        Timber.d("UPD: " + location.getLatitude() + ": " + location.getLongitude() + "; Accuracy: "
-                + location.getAccuracy());
+        Timber.d("onLocationChanged() {" + location.getLatitude() + ": " + location.getLongitude()
+                + "; Accuracy: " + location.getAccuracy() + "}");
         mResultPublisher.onNext(location);
         mResultHistoryPublisher.onNext(location);
         if (mRxLocationCallback != null) {
             mRxLocationCallback.onLocationChange(location);
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private void sendDsaLocation() {
+        Location location = mLegacyLocationManager.getLastKnownLocation(mProvider);
+        if (location != null) {
+            // Send location to server (mTrackingSubscriptions)
+            Timber.d("sendDsaLocation() {" + location.getLatitude() + ": " + location.getLongitude()
+                    + "; Accuracy: " + location.getAccuracy() + "}");
+        } else {
+            Timber.d("sendDsaLocation() skipped, no location");
         }
     }
 
