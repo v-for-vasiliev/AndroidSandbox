@@ -4,6 +4,11 @@ import android.location.Location;
 
 import rx.Observable;
 
+/**
+ * Date: 29.06.2019
+ *
+ * @author Kirill Vasiliev
+ */
 public interface RxLocationProvider {
 
     int PROVIDER_TYPE_LEGACY = 1;

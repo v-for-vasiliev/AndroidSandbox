@@ -24,6 +24,10 @@ import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 /**
+ * Date: 29.06.2019
+ *
+ * @author Kirill Vasiliev
+ *
  * Precondition: user must allow location permission request. See {@link BaseLocationActivity}
  */
 public class RxLegacyLocationProvider implements RxLocationProvider {

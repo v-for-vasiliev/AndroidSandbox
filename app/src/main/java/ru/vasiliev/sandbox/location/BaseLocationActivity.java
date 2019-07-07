@@ -5,7 +5,6 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResolvableApiException;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
@@ -16,18 +15,19 @@ import android.annotation.SuppressLint;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 
+import ru.vasiliev.sandbox.App;
 import rx.Observable;
 
-import static ru.vasiliev.sandbox.location.RxLocationProvider.PROVIDER_TYPE_FUSED;
-import static ru.vasiliev.sandbox.location.RxLocationProvider.PROVIDER_TYPE_LEGACY;
-
+/**
+ * Date: 29.06.2019
+ *
+ * @author Kirill Vasiliev
+ */
 public abstract class BaseLocationActivity extends MvpAppCompatActivity
         implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         RxLocationCallback {
@@ -53,6 +53,7 @@ public abstract class BaseLocationActivity extends MvpAppCompatActivity
                 addConnectionCallbacks(this).
                 addOnConnectionFailedListener(this).build();
 
+        /*
         int providerType = getIntent().getIntExtra(KEY_PROVIDER_TYPE, PROVIDER_TYPE_LEGACY);
         if (providerType == PROVIDER_TYPE_FUSED) {
             mRxLocationProvider = new RxFusedLocationProvider.Builder()
@@ -66,6 +67,9 @@ public abstract class BaseLocationActivity extends MvpAppCompatActivity
                     .fastestIntervalMilliseconds(2500)
                     .priority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY).build();
         }
+        */
+
+        mRxLocationProvider = App.getAppComponent().getLocationServices().getLocationProvider();
     }
 
     @Override
@@ -118,12 +122,6 @@ public abstract class BaseLocationActivity extends MvpAppCompatActivity
                         new RuntimeException("SETTINGS_CHANGE_UNAVAILABLE"));
                 break;
         }
-    }
-
-    protected boolean isLocationEnabled() {
-        int locationMode = Settings.Secure
-                .getInt(getContentResolver(), Settings.Secure.LOCATION_MODE, 0);
-        return locationMode != Settings.Secure.LOCATION_MODE_OFF;
     }
 
     private boolean checkPlayServices() {

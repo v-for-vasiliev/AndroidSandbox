@@ -12,8 +12,14 @@ import butterknife.ButterKnife;
 import ru.vasiliev.sandbox.location.BaseLocationActivity;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
+/**
+ * Date: 29.06.2019
+ *
+ * @author Kirill Vasiliev
+ */
 public class LocationActivity extends BaseLocationActivity {
 
     @BindView(R.id.output_last_location)
@@ -37,6 +43,8 @@ public class LocationActivity extends BaseLocationActivity {
     @BindView(R.id.get_locations_history)
     Button mLocationsHistoryButton;
 
+    private CompositeSubscription mSubscriptions = new CompositeSubscription();
+
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,13 +57,13 @@ public class LocationActivity extends BaseLocationActivity {
         mLastLocationButton.setOnClickListener(v -> {
             if (isLocationRequestingRunning()) {
                 mOutputLastLocation.setText("Requesting location...");
-                getLastLocation().subscribeOn(Schedulers.io())
+                mSubscriptions.add(getLastLocation().subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread()).subscribe(
-                        location -> mOutputLastLocation.setText(
-                                location.getLatitude() + " : " + location.getLongitude() + "; "
-                                        + "Accuracy: " + location.getAccuracy()),
-                        throwable -> mOutputLastLocation
-                                .setText("getLastLocation(): error: " + throwable.getMessage()));
+                                location -> mOutputLastLocation.setText(
+                                        location.getLatitude() + " : " + location.getLongitude()
+                                                + "; " + "Accuracy: " + location.getAccuracy()),
+                                throwable -> mOutputLastLocation.setText(
+                                        "getLastLocation(): error: " + throwable.getMessage())));
             } else {
                 mOutputLastLocation.setText("Location monitor is not running");
             }
@@ -64,14 +72,14 @@ public class LocationActivity extends BaseLocationActivity {
         mLocationButton.setOnClickListener(v -> {
             if (isLocationRequestingRunning()) {
                 mOutputLocation.setText("Requesting location...");
-                getLocation().subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(location -> {
+                mSubscriptions.add(getLocation().subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread()).subscribe(location -> {
                             String locationString = location.getLatitude() + " : " + location
                                     .getLongitude() + "; " + "Accuracy: " + location.getAccuracy();
                             Timber.d("getLocation(): " + locationString);
                             mOutputLocation.setText(locationString);
                         }, throwable -> mOutputLocation
-                                .setText("getLocation(): error: " + throwable.getMessage()));
+                                .setText("getLocation(): error: " + throwable.getMessage())));
             } else {
                 mOutputLocation.setText("Location monitor is not running");
             }
@@ -80,14 +88,14 @@ public class LocationActivity extends BaseLocationActivity {
         mLocationsHistoryButton.setOnClickListener(v -> {
             if (isLocationRequestingRunning()) {
                 mOutputLocationHistory.setText("Requesting location...");
-                getLocationHistory().subscribeOn(Schedulers.io())
+                mSubscriptions.add(getLocationHistory().subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread()).take(1).subscribe(location -> {
-                    String locationString = location.getLatitude() + " : " + location.getLongitude()
-                            + "; " + "Accuracy: " + location.getAccuracy();
-                    Timber.d("getLocationHistory(): " + locationString);
-                    mOutputLocationHistory.setText(locationString);
-                }, throwable -> mOutputLocationHistory
-                        .setText("getLocationHistory(): error: " + throwable.getMessage()));
+                            String locationString = location.getLatitude() + " : " + location
+                                    .getLongitude() + "; " + "Accuracy: " + location.getAccuracy();
+                            Timber.d("getLocationHistory(): " + locationString);
+                            mOutputLocationHistory.setText(locationString);
+                        }, throwable -> mOutputLocationHistory.setText(
+                                "getLocationHistory(): error: " + throwable.getMessage())));
             } else {
                 mOutputLocationHistory.setText("Location monitor is not running");
             }
@@ -116,5 +124,11 @@ public class LocationActivity extends BaseLocationActivity {
     @Override
     public void onLocationPermissionDenied() {
         mOutputError.setText("onLocationPermissionDenied");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mSubscriptions.clear();
     }
 }

@@ -25,6 +25,10 @@ import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 /**
+ * Date: 29.06.2019
+ *
+ * @author Kirill Vasiliev
+ *
  * Precondition: user must allow location permission request. See {@link BaseLocationActivity}
  *
  * Fused location provider uses all available sources. Sources choose strategy based on priority
