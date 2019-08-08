@@ -7,6 +7,7 @@ import android.support.v7.widget.Toolbar;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import ru.vasiliev.sandbox.location.LocationActivity;
 
 /**
  * Date: 29.06.2019

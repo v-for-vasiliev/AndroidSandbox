@@ -12,6 +12,26 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        sourceSets.main {
+            jni.srcDirs = [] // Disable automatic ndk-build call
+            jniLibs.srcDir 'src/main/jniLibs' // JNI libs location
+        }
+
+        externalNativeBuild {
+            cmake {
+                cppFlags "-DWITH_LIVENESS -std=c++11 -frtti"
+                arguments "-DFSDK_DIR=$projectDir/ext/luna_sdk",
+                        "-DANDROID_STL=c++_shared"
+                abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86'
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "ext/CMakeLists.txt"
+        }
     }
 
     packagingOptions {
@@ -24,7 +44,6 @@ android {
     }
 
     buildTypes.all {
-        buildConfigField "String", "BUILD_TAG", "\"generic\""
         // OkHttp
         buildConfigField "long", "OKHTTP_CONNECT_TIMEOUT_SEC", "15"
         buildConfigField "long", "OKHTTP_READ_TIMEOUT_SEC", "30"
@@ -48,17 +67,6 @@ android {
             applicationIdSuffix ".debug"
             debuggable true
             buildConfigField "String", "BUILD_TAG", "\"debug\""
-        }
-
-        /**
-         * The `initWith` property allows you to copy configurations from other build types,
-         * then configure just the settings you want to change. This one copies the debug build
-         * type, and then changes the manifest placeholder and application ID.
-         */
-        staging {
-            initWith debug
-            applicationIdSuffix ".debugStaging"
-            buildConfigField "String", "BUILD_TAG", "\"debugStaging\""
         }
     }
 }

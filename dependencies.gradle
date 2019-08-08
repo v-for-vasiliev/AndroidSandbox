@@ -28,77 +28,77 @@ ext {
     ]
 
     supportLibs = [
-            appCompat      : "com.android.support:appcompat-v7:${supportVersions.supportLibs}", // implementation
-            design         : "com.android.support:design:${supportVersions.supportLibs}", // implementation
-            recyclerview   : "com.android.support:recyclerview-v7:${supportVersions.supportLibs}", // compile
-            cardview       : "com.android.support:cardview-v7:${supportVersions.supportLibs}", // compile
-            constaintLayout: "com.android.support.constraint:constraint-layout:${supportVersions.constraintLayout}" // implementation
+            appCompat      : "com.android.support:appcompat-v7:${supportVersions.supportLibs}",
+            design         : "com.android.support:design:${supportVersions.supportLibs}",
+            recyclerview   : "com.android.support:recyclerview-v7:${supportVersions.supportLibs}",
+            cardview       : "com.android.support:cardview-v7:${supportVersions.supportLibs}",
+            constaintLayout: "com.android.support.constraint:constraint-layout:${supportVersions.constraintLayout}"
     ]
 
     dagger2 = [
-            dagger                   : "com.google.dagger:dagger:${versions.dagger2}", // compile
-            daggerCompiler           : "com.google.dagger:dagger-compiler:${versions.dagger2}", // annotationProcessor
-            daggerAndroid            : "com.google.dagger:dagger-android:${versions.dagger2}", // compile
-            daggerAndroidSupport     : "com.google.dagger:dagger-android-support:${versions.dagger2}", // compile
-            daggerAnnotationProcessor: "com.google.dagger:dagger-android-processor:${versions.dagger2}" // annotationProcessor
+            dagger               : "com.google.dagger:dagger:${versions.dagger2}",
+            daggerCompiler       : "com.google.dagger:dagger-compiler:${versions.dagger2}",
+            daggerAndroid        : "com.google.dagger:dagger-android:${versions.dagger2}",
+            daggerAndroidSupport : "com.google.dagger:dagger-android-support:${versions.dagger2}",
+            daggerAndroidCompiler: "com.google.dagger:dagger-android-processor:${versions.dagger2}"
     ]
 
     rxjava2 = [
-            rxjava   : "io.reactivex.rxjava2:rxjava:${versions.rxjava}", // compile
-            rxandroid: "io.reactivex.rxjava2:rxandroid:${versions.rxandroid}", // compile
-            rxbinding: "com.jakewharton.rxbinding:rxbinding-support-v4:${versions.rxbinding}", // compile
+            rxjava   : "io.reactivex.rxjava2:rxjava:${versions.rxjava}",
+            rxandroid: "io.reactivex.rxjava2:rxandroid:${versions.rxandroid}",
+            rxbinding: "com.jakewharton.rxbinding:rxbinding-support-v4:${versions.rxbinding}",
     ]
 
     retrofit = [
-            retrofit                  : "com.squareup.retrofit2:retrofit:${versions.retrofit}", // compile
-            retrofitRxJavaAdapter     : "com.squareup.retrofit2:adapter-rxjava2:${versions.retrofit}", // compile
-            retrofitConverterGson     : "com.squareup.retrofit2:converter-gson:${versions.retrofit}", // compile
-            retrofitConverterJackson  : "com.squareup.retrofit2:converter-jackson:${versions.retrofit}", // compile
-            retrofitConverterSimpleXML: "com.squareup.retrofit2:converter-simplexml:${versions.retrofit}" // compile
+            retrofit                  : "com.squareup.retrofit2:retrofit:${versions.retrofit}",
+            retrofitRxJavaAdapter     : "com.squareup.retrofit2:adapter-rxjava2:${versions.retrofit}",
+            retrofitConverterGson     : "com.squareup.retrofit2:converter-gson:${versions.retrofit}",
+            retrofitConverterJackson  : "com.squareup.retrofit2:converter-jackson:${versions.retrofit}",
+            retrofitConverterSimpleXML: "com.squareup.retrofit2:converter-simplexml:${versions.retrofit}"
     ]
 
     butterknife = [
-            butterknife                   : "com.jakewharton:butterknife:${versions.butterknife}", // compile
-            butterknifeAnnotationProcessor: "com.jakewharton:butterknife-compiler:${versions.butterknife}" // annotationProcessor
+            butterknife        : "com.jakewharton:butterknife:${versions.butterknife}",
+            butterknifeCompiler: "com.jakewharton:butterknife-compiler:${versions.butterknife}"
     ]
 
     timber = [
-            timber: "com.jakewharton.timber:timber:${versions.timber}" // compile
+            timber: "com.jakewharton.timber:timber:${versions.timber}"
     ]
 
     glide = [
-            glide                   : "com.github.bumptech.glide:glide:${versions.glide}", // implementation
-            glideAnnotationProcessor: "com.github.bumptech.glide:compiler:${versions.glide}", // annotationProcessor
-            recyclerIntegration     : "com.github.bumptech.glide:recyclerview-integration:${versions.glide}" // // compile
+            glide              : "com.github.bumptech.glide:glide:${versions.glide}",
+            glideCompiler      : "com.github.bumptech.glide:compiler:${versions.glide}",
+            recyclerIntegration: "com.github.bumptech.glide:recyclerview-integration:${versions.glide}"
     ]
 
     moxy = [
-            moxy                   : "com.arello-mobile:moxy:${versions.moxy}", // compile
-            moxyAnnotationProcessor: "com.arello-mobile:moxy-compiler:${versions.moxy}", // annotationProcessor
-            moxyAppCompat          : "com.arello-mobile:moxy-app-compat:${versions.moxy}" // compile
+            moxy         : "com.arello-mobile:moxy:${versions.moxy}",
+            moxyCompiler : "com.arello-mobile:moxy-compiler:${versions.moxy}",
+            moxyAppCompat: "com.arello-mobile:moxy-app-compat:${versions.moxy}"
     ]
 
     jodatime = [
-            jodatime: "joda-time:joda-time:${versions.jodatime}" // compile
+            jodatime: "joda-time:joda-time:${versions.jodatime}"
     ]
 
     room = [
-            room                   : "android.arch.persistence.room:runtime:${versions.room}", // implementation
-            roomAnnotationProcessor: "android.arch.persistence.room:compiler:${versions.room}", // annotationProcessor
-            roomRxJava             : "android.arch.persistence.room:rxjava2:${versions.room}" // implementation
+            room        : "android.arch.persistence.room:runtime:${versions.room}",
+            roomCompiler: "android.arch.persistence.room:compiler:${versions.room}",
+            roomRxJava  : "android.arch.persistence.room:rxjava2:${versions.room}"
     ]
 
     stetho = [
-            stetho      : "com.facebook.stetho:stetho:${versions.stetho}", // compile
-            stethoOkHttp: "com.facebook.stetho:stetho-okhttp3:${versions.stetho}" // compile
+            stetho      : "com.facebook.stetho:stetho:${versions.stetho}",
+            stethoOkHttp: "com.facebook.stetho:stetho-okhttp3:${versions.stetho}"
     ]
 
     gson = [
-            gson: "com.google.code.gson:gson:${versions.gson}" // compile
+            gson: "com.google.code.gson:gson:${versions.gson}"
     ]
 
     playservices = [
-            location: "com.google.android.gms:play-services-location:${versions.playservices}" // implementation
+            location: "com.google.android.gms:play-services-location:${versions.playservices}"
     ]
 
     AppDependecies = [
@@ -106,58 +106,58 @@ ext {
             [configuration: "implementation", dependency: supportLibs.appCompat],
             [configuration: "implementation", dependency: supportLibs.design],
             [configuration: "implementation", dependency: supportLibs.constaintLayout],
-            [configuration: "compile", dependency: supportLibs.cardview],
-            [configuration: "compile", dependency: supportLibs.recyclerview],
+            [configuration: "implementation", dependency: supportLibs.cardview],
+            [configuration: "implementation", dependency: supportLibs.recyclerview],
 
             // Dagger2
-            [configuration: "compile", dependency: dagger2.dagger],
+            [configuration: "implementation", dependency: dagger2.dagger],
             [configuration: "annotationProcessor", dependency: dagger2.daggerCompiler],
-            [configuration: "compile", dependency: dagger2.daggerAndroid],
-            [configuration: "compile", dependency: dagger2.daggerAndroidSupport],
-            [configuration: "annotationProcessor", dependency: dagger2.daggerAnnotationProcessor],
+            [configuration: "implementation", dependency: dagger2.daggerAndroid],
+            [configuration: "implementation", dependency: dagger2.daggerAndroidSupport],
+            [configuration: "annotationProcessor", dependency: dagger2.daggerAndroidCompiler],
 
             // RxJava2
-            [configuration: "compile", dependency: rxjava2.rxjava],
-            [configuration: "compile", dependency: rxjava2.rxandroid],
-            [configuration: "compile", dependency: rxjava2.rxbinding],
+            [configuration: "implementation", dependency: rxjava2.rxjava],
+            [configuration: "implementation", dependency: rxjava2.rxandroid],
+            [configuration: "implementation", dependency: rxjava2.rxbinding],
 
             // Retrofit
-            [configuration: "compile", dependency: retrofit.retrofit],
-            [configuration: "compile", dependency: retrofit.retrofitRxJavaAdapter],
-            [configuration: "compile", dependency: retrofit.retrofitConverterGson],
-            [configuration: "compile", dependency: retrofit.retrofitConverterJackson],
+            [configuration: "implementation", dependency: retrofit.retrofit],
+            [configuration: "implementation", dependency: retrofit.retrofitRxJavaAdapter],
+            [configuration: "implementation", dependency: retrofit.retrofitConverterGson],
+            [configuration: "implementation", dependency: retrofit.retrofitConverterJackson],
 
             // ButterKnife
-            [configuration: "compile", dependency: butterknife.butterknife],
-            [configuration: "annotationProcessor", dependency: butterknife.butterknifeAnnotationProcessor],
+            [configuration: "implementation", dependency: butterknife.butterknife],
+            [configuration: "annotationProcessor", dependency: butterknife.butterknifeCompiler],
 
             // Timber
-            [configuration: "compile", dependency: timber.timber],
+            [configuration: "implementation", dependency: timber.timber],
 
             // Glide
             [configuration: "implementation", dependency: glide.glide],
-            [configuration: "annotationProcessor", dependency: glide.glideAnnotationProcessor],
-            [configuration: "compile", dependency: glide.recyclerIntegration],
+            [configuration: "annotationProcessor", dependency: glide.glideCompiler],
+            [configuration: "implementation", dependency: glide.recyclerIntegration],
 
             // Moxy
-            [configuration: "compile", dependency: moxy.moxy],
-            [configuration: "annotationProcessor", dependency: moxy.moxyAnnotationProcessor],
-            [configuration: "compile", dependency: moxy.moxyAppCompat],
+            [configuration: "implementation", dependency: moxy.moxy],
+            [configuration: "annotationProcessor", dependency: moxy.moxyCompiler],
+            [configuration: "implementation", dependency: moxy.moxyAppCompat],
 
             // JodaTime
-            [configuration: "compile", dependency: jodatime.jodatime],
+            [configuration: "implementation", dependency: jodatime.jodatime],
 
             // Room
             [configuration: "implementation", dependency: room.room],
-            [configuration: "annotationProcessor", dependency: room.roomAnnotationProcessor],
+            [configuration: "annotationProcessor", dependency: room.roomCompiler],
             [configuration: "implementation", dependency: room.roomRxJava],
 
             // Stetho
-            [configuration: "compile", dependency: stetho.stetho],
-            [configuration: "compile", dependency: stetho.stethoOkHttp],
+            [configuration: "implementation", dependency: stetho.stetho],
+            [configuration: "implementation", dependency: stetho.stethoOkHttp],
 
             // Gson
-            [configuration: "compile", dependency: gson.gson],
+            [configuration: "implementation", dependency: gson.gson],
 
             // Playservices
             [configuration: "implementation", dependency: playservices.location]
