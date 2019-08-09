@@ -3,6 +3,9 @@
           xmlns:tools="http://schemas.android.com/tools"
           package="ru.vasiliev.sandbox">
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
@@ -25,7 +28,11 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".location.LocationActivity"
+
+        <activity android:name=".location.presentation.LocationActivity"
+                  android:theme="@style/AppTheme.NoActionBar"/>
+
+        <activity android:name=".visionlabs.presentation.VisionLabsActivity"
                   android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 

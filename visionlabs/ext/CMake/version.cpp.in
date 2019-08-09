@@ -1,0 +1,4 @@
+#include <version.h>
+
+const char* GIT_VERSION = "@VERSION_SHORT@";
+const char* GIT_HASH = "@VERSION_HASH@";

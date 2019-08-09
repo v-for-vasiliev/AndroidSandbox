@@ -1,13 +1,14 @@
 package ru.vasiliev.sandbox;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import ru.vasiliev.sandbox.location.LocationActivity;
+import ru.vasiliev.sandbox.location.presentation.LocationActivity;
+import ru.vasiliev.sandbox.visionlabs.presentation.VisionLabsActivity;
 
 /**
  * Date: 29.06.2019
@@ -16,11 +17,19 @@ import ru.vasiliev.sandbox.location.LocationActivity;
  */
 public class MainActivity extends AppCompatActivity {
 
-    @OnClick(R.id.location)
-    void onLocationClick() {
-        Intent intent = new Intent(MainActivity.this, LocationActivity.class);
-        // intent.putExtra(KEY_PROVIDER_TYPE, PROVIDER_TYPE_FUSED);
-        startActivity(intent);
+    @OnClick({R.id.location, R.id.vision_labs})
+    void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.location:
+                LocationActivity.start(this);
+                break;
+            case R.id.vision_labs:
+                VisionLabsActivity.start(this);
+                break;
+            default:
+                break;
+        }
+
     }
 
     @Override
