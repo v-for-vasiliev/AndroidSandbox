@@ -1,4 +1,103 @@
 <resources>
     <string name="app_name">SandBox</string>
     <string name="action_settings">Settings</string>
+
+    <!-- Vision Labs -->
+    <string name="login_screen_visionlabs">ВижнЛабс</string>
+    <string name="login_screen_visual_recognition_company">visual recognition company</string>
+    <string name="login_screen_vl_face_engine_mobile">LUNA Mobile Online</string>
+    <string name="login_screen_vl_face_engine_mobile_offline">LUNA Mobile Offline</string>
+    <string name="login_screen_email_username_hint">Имя пользователя</string>
+    <string name="login_screen_login">Войти</string>
+    <string name="login_screen_new_user">Регистрация</string>
+    <string name="login_screen_settings">Настройки</string>
+
+    <string name="new_user_register">Регистрация</string>
+    <string name="new_user_user_name">Имя пользователя</string>
+    <string name="new_user_email">Email</string>
+    <string name="new_user_phone_number">Номер телефона</string>
+
+    <string name="settings_title">Настройки</string>
+    <string name="settings_server_title">Настройки сервера</string>
+    <string name="settings_apply">ОК</string>
+    <string name="settings_select_the_authentication_method">Метод аутентификации:</string>
+    <string name="Server_connection_settings">Настройки соединения с сервером</string>
+    <string name="Server_SettoDefault">Настроить по умолчанию</string>
+    <string name="settings_face">Лицо</string>
+    <string name="settings_finger">Палец</string>
+    <string name="settings_pincode">PIN</string>
+    <string name="settings_liveness">Liveness</string>
+    <string name="settings_lsdk_eyes">Blink liveness</string>
+    <string name="settings_lsdk_zoom">Faceflow liveness</string>
+    <string name="settings_show_detection">Зона детекции</string>
+    <string name="settings_save_photo">Сохранять фото</string>
+    <string name="settings_ignore_eyes">Игнорировать закрытость глаз</string>
+    <string name="register_sign_up">Зарегистрироваться</string>
+    <string name="register_hint_pin">PIN</string>
+    <string name="register_hint_confirm_pin">Повторите PIN</string>
+    <string name="registration_wrong_confirm_password">PIN не подтвержден</string>
+    <string name="settings_short_password" formatted="false">PIN должен содержать от %d до %d цифр</string>
+    <string name="register_username_exist">Имя пользователя %s уже существует!</string>
+    <string name="register_username_short">Минимальное количество символов %d</string>
+    <string name="register_username_long">Максимальное количество символов %d</string>
+    <string name="register_email_error">Неверный формат почты</string>
+    <string name="register_phone_error">Неверный формат номера телефона</string>
+
+    <string name="fragment_photo_title">Фото</string>
+    <string name="registration_title">Новый пользователь</string>
+    <string name="registration_photo">Фото</string>
+    <string name="authentication_title">Аутентификация</string>
+    <string name="auth_face_tab_title">Лицо</string>
+    <string name="auth_finger_tab_title">Палец</string>
+    <string name="auth_pin_tab_title">PIN</string>
+    <string name="fragment_pin_enter_pincode">Введите PIN</string>
+    <string name="pin_fragment_incorrect_pin">Неверный PIN</string>
+    <string name="fragment_fingerprint_message">Коснитесь пальцем\n“LUNA Mobile”</string>
+    <string name="error_face_not_found">Лицо не найдено</string>
+    <string name="error_liveness">Проверка liveness не пройдена</string>
+    <string name="retry">Повторить</string>
+    <string name="authentication_successful">аутентификация\nуспешна</string>
+    <string name="verification_time" formatted="false">Время: %d мс</string>
+    <string name="login_not_found">Пользователь с таким именем не найден</string>
+    <string name="log_out">Выйти</string>
+    <string name="face_not_recognized">Не успешно</string>
+    <string name="put_your_head_into_oval">Разместите лицо в область овала</string>
+    <string name="moving_too_fast">Зафиксировано движение</string>
+    <string name="look_straight_at_the_camer">Посмотрите в камеру</string>
+    <string name="overlight">Изображение засвечено</string>
+    <string name="overdark">Слишком темно</string>
+    <string name="overgray">Изображение десатурировано</string>
+    <string name="overblur">Изображение не сфокусировано</string>
+    <string name="close_eyes">"Закройте, пожалуйста, глаза"</string>
+    <string name="save">Сохранить</string>
+    <string name="access_denied">Извините, доступ запрещен</string>
+    <string name="no_fingers">Отпечатки пальцев отсутствуют</string>
+    <string name="permission_need_for_auth">Необходим доступ к камере и местоположению для аутентификации</string>
+    <string name="permission_need_for_register">Необходим доступ к камере и местоположению для регистрации нового пользователя</string>
+    <string name="camera_configuration_failed">Проблема настройки камеры</string>
+    <string name="photo_saved_to_gallery">Фотография сохранена в галерее</string>
+    <string name="permission_need_for_write_external">Необходимо разрешение записи для сохранения фотографии на телефон</string>
+    <string name="cancel">Отмена</string>
+    <string name="saveFingers">Сохранить отпечатки пальца</string>
+    <string name="fingerprint_not_found">Не найден отпечаток</string>
+    <string name="no_internet_connection">Нет соединения с интернет</string>
+    <string name="service_unavailable">Сервис недоступен</string>
+    <string name="bad_internet_conneciton">Соединение с интернетом не было установлено</string>
+    <string name="bad_server_address">Адрес сервера не найден</string>
+    <string name ="bad_acc_data">Данные аккаунта сервера неверны</string>
+    <string name ="TimeOut">Долгое ожидание ответа от сервера</string>
+    <string name="settings">Настройки</string>
+    <string name="fingerprint_request_is_denied">Запрос отпечатка пальца отклонен. Идентификация по отпечатку заблокирована в течение 30 секунд по причине 5 неудачных проверок пароля.</string>
+    <string name="auth_success_screen_vl_face_engine_mobile"></string>
+    <string name="google_play_services_error">"Ошибка Google Play Services: "</string>
+    <string name="user_not_found">"Такого пользователя не существует"</string>
+    <string name="Ok">"Ок"</string>
+    <string name="settings_luna2">Luna1</string>
+    <string name="look_straight_at_the_camera">Смотрите прямо на камеру</string>
+    <string name="zoom_out_and_look_straight_at_the_camera">Удалите камеру и смотрите прямо</string>
+    <string name="zoom_in_and_look_straight_at_the_camera">Приблизьте камеру и смотрите прямо</string>
+    <string name="zoom_success">Успех!</string>
+    <string name="Login">Логин</string>
+    <string name="Password">Пароль</string>
+    <string name="Doesnt_exist">Данные аккаунта некорректны</string>
 </resources>

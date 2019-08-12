@@ -12,12 +12,18 @@ import io.reactivex.schedulers.Schedulers;
 import ru.vasiliev.sandbox.App;
 import ru.vasiliev.sandbox.mvp.MvpBasePresenter;
 import ru.vasiliev.sandbox.visionlabs.domain.VisionLabsInteractor;
+import ru.vasiliev.sandbox.visionlabs.repository.VisionLabsPreferences;
 
 @InjectViewState
 public class VisionLabsPresenter extends MvpBasePresenter<VisionLabsView> {
 
     @Inject
     VisionLabsInteractor mVisionLabsInteractor;
+
+    @Inject
+    VisionLabsPreferences mPreferences;
+
+    private boolean mEngineLoaded = false;
 
     private Context mContext;
 
@@ -27,25 +33,43 @@ public class VisionLabsPresenter extends MvpBasePresenter<VisionLabsView> {
     }
 
     @Override
-    protected void onFirstViewAttach() {
-        super.onFirstViewAttach();
-        getViewState().showLoader();
-        addSubscription(Observable.fromCallable(() -> mVisionLabsInteractor.loadLibraries())
-                .filter(result -> {
-                    if (!result) {
-                        getViewState().onEngineLoadError(
-                                new RuntimeException("Error load native libraries!"));
-                    }
-                    return result;
-                }).map(result -> mVisionLabsInteractor.unpackResourcesAndInitEngine(mContext))
-                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(result -> getViewState().onEngineLoadFinished(result),
-                        throwable -> getViewState().onEngineLoadError(throwable)));
+    public void attachView(VisionLabsView view) {
+        super.attachView(view);
+        getViewState().requestPermissions();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         App.getComponentManager().releaseVisionLabsComponent();
+    }
+
+    void loadEngine() {
+        getViewState().showLoader();
+        addSubscription(Observable.fromCallable(() -> mVisionLabsInteractor.loadLibraries())
+                .filter(result -> {
+                    if (!result) {
+                        mEngineLoaded = false;
+                        getViewState().onEngineLoadError(
+                                new RuntimeException("Error load native libraries!"));
+                    }
+                    return result;
+                }).map(result -> mVisionLabsInteractor.unpackResourcesAndInitEngine(mContext))
+                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(result -> {
+                    mEngineLoaded = result;
+                    getViewState().onEngineLoadFinished(mEngineLoaded);
+                }, throwable -> {
+                    mEngineLoaded = false;
+                    getViewState().onEngineLoadError(throwable);
+                }));
+    }
+
+    VisionLabsPreferences getPreferences() {
+        return mPreferences;
+    }
+
+    public boolean isEngineLoaded() {
+        return mEngineLoaded;
     }
 }

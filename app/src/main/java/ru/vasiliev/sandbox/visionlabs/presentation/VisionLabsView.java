@@ -7,6 +7,8 @@ import com.arellomobile.mvp.viewstate.strategy.StateStrategyType;
 @StateStrategyType(AddToEndSingleStrategy.class)
 interface VisionLabsView extends MvpView {
 
+    void requestPermissions();
+
     void showLoader();
 
     void onEngineLoadFinished(boolean result);

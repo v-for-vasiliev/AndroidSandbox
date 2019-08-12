@@ -1,0 +1,59 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
+                android:gravity="center_horizontal">
+
+    <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/photo_save_photo_margin_top">
+
+        <com.makeramen.roundedimageview.RoundedImageView
+                android:id="@+id/photo"
+                android:layout_width="@dimen/rounded_photo_size"
+                android:layout_height="@dimen/rounded_photo_size"
+                android:scaleType="centerCrop"
+                app:riv_border_color="@color/accentColor"
+                app:riv_border_width="7dp"
+                app:riv_mutate_background="true"
+                app:riv_oval="false"/>
+
+        <ProgressBar
+                style="@style/Base.Widget.AppCompat.ProgressBar"
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:indeterminate="true"
+                android:visibility="invisible"/>
+    </RelativeLayout>
+
+    <Button
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:id="@+id/retry"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/button_height"
+            android:layout_above="@+id/save"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="10dp"
+            android:text="@string/retry"
+            android:textColor="@color/accentColor"
+            android:textSize="14sp"/>
+
+    <Button
+            android:id="@+id/save"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/button_height"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="@dimen/button_margin_bottom"
+            android:background="@color/accentColor"
+            android:text="@string/Ok"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"/>
+
+</RelativeLayout>

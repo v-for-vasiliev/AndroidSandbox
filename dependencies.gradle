@@ -6,20 +6,24 @@ ext {
     buildToolsVersion = '26.0.2'
 
     versions = [
-            dagger2     : '2.11',
-            rxjava      : '2.1.8',
-            rxandroid   : '2.0.1',
-            rxbinding   : "0.4.0",
-            retrofit    : '2.3.0',
-            butterknife : '8.8.1',
-            timber      : '4.1.2',
-            glide       : '4.3.1',
-            moxy        : '1.5.3',
-            jodatime    : '2.9.9',
-            room        : '1.1.0-beta1',
-            stetho      : '1.5.0',
-            gson        : '2.8.0',
-            playservices: '16.0.0'
+            dagger2         : '2.11',
+            rxjava          : '2.1.8',
+            rxandroid       : '2.0.1',
+            rxbinding       : '0.4.0',
+            rxpermissions   : '0.8.0',
+            retrofit        : '2.3.0',
+            butterknife     : '8.8.1',
+            timber          : '4.1.2',
+            glide           : '4.3.1',
+            picasso         : '2.5.2',
+            moxy            : '1.5.3',
+            jodatime        : '2.9.9',
+            room            : '1.1.0-beta1',
+            stetho          : '1.5.0',
+            gson            : '2.8.0',
+            playservices    : '16.0.0',
+            proxypref       : '0.2.0',
+            roundedimageview: '2.2.1'
     ]
 
     supportVersions = [
@@ -49,12 +53,26 @@ ext {
             rxbinding: "com.jakewharton.rxbinding:rxbinding-support-v4:${versions.rxbinding}",
     ]
 
+    rxbindings = [
+            rxpermissions: "com.tbruyelle.rxpermissions:rxpermissions:${versions.rxpermissions}@aar"
+    ]
+
     retrofit = [
             retrofit                  : "com.squareup.retrofit2:retrofit:${versions.retrofit}",
             retrofitRxJavaAdapter     : "com.squareup.retrofit2:adapter-rxjava2:${versions.retrofit}",
             retrofitConverterGson     : "com.squareup.retrofit2:converter-gson:${versions.retrofit}",
             retrofitConverterJackson  : "com.squareup.retrofit2:converter-jackson:${versions.retrofit}",
             retrofitConverterSimpleXML: "com.squareup.retrofit2:converter-simplexml:${versions.retrofit}"
+    ]
+
+    room = [
+            room        : "android.arch.persistence.room:runtime:${versions.room}",
+            roomCompiler: "android.arch.persistence.room:compiler:${versions.room}",
+            roomRxJava  : "android.arch.persistence.room:rxjava2:${versions.room}"
+    ]
+
+    playservices = [
+            location: "com.google.android.gms:play-services-location:${versions.playservices}"
     ]
 
     butterknife = [
@@ -72,6 +90,14 @@ ext {
             recyclerIntegration: "com.github.bumptech.glide:recyclerview-integration:${versions.glide}"
     ]
 
+    picasso = [
+            picasso: "com.squareup.picasso:picasso:${versions.picasso}"
+    ]
+
+    roundedimageview = [
+            roundedimageview: "com.makeramen:roundedimageview:${versions.roundedimageview}"
+    ]
+
     moxy = [
             moxy         : "com.arello-mobile:moxy:${versions.moxy}",
             moxyCompiler : "com.arello-mobile:moxy-compiler:${versions.moxy}",
@@ -80,12 +106,6 @@ ext {
 
     jodatime = [
             jodatime: "joda-time:joda-time:${versions.jodatime}"
-    ]
-
-    room = [
-            room        : "android.arch.persistence.room:runtime:${versions.room}",
-            roomCompiler: "android.arch.persistence.room:compiler:${versions.room}",
-            roomRxJava  : "android.arch.persistence.room:rxjava2:${versions.room}"
     ]
 
     stetho = [
@@ -97,8 +117,8 @@ ext {
             gson: "com.google.code.gson:gson:${versions.gson}"
     ]
 
-    playservices = [
-            location: "com.google.android.gms:play-services-location:${versions.playservices}"
+    proxypref = [
+            proxypref: "info.android15.proxypref:proxypref:${versions.proxypref}"
     ]
 
     AppDependecies = [
@@ -121,11 +141,22 @@ ext {
             [configuration: "implementation", dependency: rxjava2.rxandroid],
             [configuration: "implementation", dependency: rxjava2.rxbinding],
 
+            // Rx bindings
+            [configuration: "implementation", dependency: rxbindings.rxpermissions],
+
             // Retrofit
             [configuration: "implementation", dependency: retrofit.retrofit],
             [configuration: "implementation", dependency: retrofit.retrofitRxJavaAdapter],
             [configuration: "implementation", dependency: retrofit.retrofitConverterGson],
             [configuration: "implementation", dependency: retrofit.retrofitConverterJackson],
+
+            // Room
+            [configuration: "implementation", dependency: room.room],
+            [configuration: "annotationProcessor", dependency: room.roomCompiler],
+            [configuration: "implementation", dependency: room.roomRxJava],
+
+            // Playservices
+            [configuration: "implementation", dependency: playservices.location],
 
             // ButterKnife
             [configuration: "implementation", dependency: butterknife.butterknife],
@@ -139,6 +170,9 @@ ext {
             [configuration: "annotationProcessor", dependency: glide.glideCompiler],
             [configuration: "implementation", dependency: glide.recyclerIntegration],
 
+            // Picasso
+            [configuration: "implementation", dependency: picasso.picasso],
+
             // Moxy
             [configuration: "implementation", dependency: moxy.moxy],
             [configuration: "annotationProcessor", dependency: moxy.moxyCompiler],
@@ -147,11 +181,6 @@ ext {
             // JodaTime
             [configuration: "implementation", dependency: jodatime.jodatime],
 
-            // Room
-            [configuration: "implementation", dependency: room.room],
-            [configuration: "annotationProcessor", dependency: room.roomCompiler],
-            [configuration: "implementation", dependency: room.roomRxJava],
-
             // Stetho
             [configuration: "implementation", dependency: stetho.stetho],
             [configuration: "implementation", dependency: stetho.stethoOkHttp],
@@ -159,7 +188,10 @@ ext {
             // Gson
             [configuration: "implementation", dependency: gson.gson],
 
-            // Playservices
-            [configuration: "implementation", dependency: playservices.location]
+            // Proxypreferences
+            [configuration: "implementation", dependency: proxypref.proxypref],
+
+            // Rounded Image View
+            [configuration: "implementation", dependency: roundedimageview.roundedimageview]
     ]
 }

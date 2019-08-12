@@ -11,6 +11,6 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Scope
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ActivityScope {
+public @interface VisionLabsScope {
 
 }
