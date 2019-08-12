@@ -15,6 +15,7 @@ import android.support.annotation.NonNull;
 
 import java.util.concurrent.TimeUnit;
 
+import ru.vasiliev.sandbox.location.presentation.BaseLocationActivity;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;

@@ -45,9 +45,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import ru.vasiliev.sandbox.App;
 import ru.vasiliev.sandbox.R;
+import ru.vasiliev.sandbox.visionlabs.data.VisionLabsPreferences;
 import ru.vasiliev.sandbox.visionlabs.domain.VisionLabsConfig;
 import ru.vasiliev.sandbox.visionlabs.presentation.registration.FaceNotFoundFragment;
-import ru.vasiliev.sandbox.visionlabs.repository.VisionLabsPreferences;
 import ru.vasiliev.sandbox.visionlabs.view.FaceBoundSurfaceView;
 import ru.visionlab.faceengine.FaceEngineJNI;
 import ru.visionlab.faceengine.PhotoProcessor;
@@ -55,9 +55,23 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-@SuppressWarnings("deprecation")
 public class PhotoFragment extends Fragment
         implements Camera.PreviewCallback, PhotoProcessor.Listener {
+
+    public static final String TAG = PhotoFragment.class.getName();
+
+    public interface Listener {
+
+        void onBestFrameReady(Bitmap bitmap);
+
+        void onTimeout(FaceNotFoundFragment.Reason reason);
+
+        void onTimeout();
+
+        void onLivenessWaitingOpenedEyes();
+
+        void onLivenessResult(int state, int action);
+    }
 
     protected static final int TIMEOUT = 10;
 
@@ -84,10 +98,19 @@ public class PhotoFragment extends Fragment
     @BindView(R.id.layout1)
     LinearLayout layout1;
 
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
+
+    @BindView(R.id.timelog)
+    TextView timelog;
+
+    @BindView(R.id.flipCam)
+    ImageView flipCamView;
+
     @Inject
     VisionLabsPreferences preferences;
 
-    PhotoProcessor photoProcessor;
+    PhotoProcessor mPhotoProcessor;
 
     HolderCallback holderCallback;
 
@@ -111,16 +134,8 @@ public class PhotoFragment extends Fragment
 
     boolean ShowMsg = true;
 
-    @BindView(R.id.progressBar)
-    ProgressBar progressBar;
 
-    @BindView(R.id.timelog)
-    TextView timelog;
-
-    @BindView(R.id.flipCam)
-    ImageView flipCamView;
-
-    private Listener listener;
+    private Listener mListener;
 
     private boolean ignoreTimeout;
 
@@ -128,7 +143,7 @@ public class PhotoFragment extends Fragment
 
     Rect maskRect;
 
-    private boolean checkLiveness = false;
+    private boolean mCheckLiveness = false;
 
     private boolean cameraFlashIsSupported = false;
 
@@ -140,28 +155,27 @@ public class PhotoFragment extends Fragment
 
     private long livenessStart = 0;
 
-    public PhotoFragment() {
-        maskRect = new android.graphics.Rect();
-    }
-
     public static PhotoFragment newInstance() {
-
         PhotoFragment fragment = new PhotoFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
     }
 
+    public PhotoFragment() {
+        maskRect = new android.graphics.Rect();
+    }
+
     public void setListener(Listener listener) {
-        this.listener = listener;
+        mListener = listener;
     }
 
     public void setPhotoProcessor(PhotoProcessor photoProcessor) {
-        this.photoProcessor = photoProcessor;
+        mPhotoProcessor = photoProcessor;
     }
 
     public void enableLivenessCheck(boolean enable) {
-        this.checkLiveness = enable;
+        mCheckLiveness = enable;
     }
 
     @Override
@@ -214,7 +228,7 @@ public class PhotoFragment extends Fragment
 
     public void hideWaitState() {
         if (preferences.getZoomAuth()
-                && checkLiveness) {//set mask to visible in auth stage if zoom liveness is enabled
+                && mCheckLiveness) {//set mask to visible in auth stage if zoom liveness is enabled
             mask.setVisibility(View.VISIBLE);
         } else {
             mask.setVisibility(preferences.getShowDetection() ? View.INVISIBLE : View.VISIBLE);
@@ -250,10 +264,10 @@ public class PhotoFragment extends Fragment
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        getActivity().setTitle("Фото");
+        getActivity().setTitle(R.string.fragment_photo_title);
         zoom_state.setTextColor(Color.parseColor("#551A8B"));//dark purple
 
-        if (!checkLiveness) {
+        if (!mCheckLiveness) {
             MASKBIG = false;
             MASKMEDIUM = true;
             MASKSMALL = false;
@@ -330,9 +344,9 @@ public class PhotoFragment extends Fragment
         Observable.timer(Math.max(delay, 0), TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
                 .subscribe(value -> {
-                    if (listener != null && !ignoreTimeout) {
-                        listener.onTimeout(FaceNotFoundFragment.Reason.NOT_FOUND);
-                        listener.onTimeout();
+                    if (mListener != null && !ignoreTimeout) {
+                        mListener.onTimeout(FaceNotFoundFragment.Reason.NOT_FOUND);
+                        mListener.onTimeout();
                     }
                 });
     }
@@ -343,9 +357,9 @@ public class PhotoFragment extends Fragment
         if (camera == null) {
             startCapture();
         }
-        photoProcessor.setListener(this);
-        photoProcessor.setNeedPortrait(preferences.getNeedPortrait());
-        photoProcessor.disableOpenEyesCheck(preferences.getIgnoreEyes());
+        mPhotoProcessor.setListener(this);
+        mPhotoProcessor.setNeedPortrait(preferences.getNeedPortrait());
+        mPhotoProcessor.disableOpenEyesCheck(preferences.getIgnoreEyes());
         hideWaitState();
     }
 
@@ -384,7 +398,7 @@ public class PhotoFragment extends Fragment
             camera.release();
             camera = null;
         }
-        photoProcessor.removeListeners();
+        mPhotoProcessor.removeListeners();
     }
 
 
@@ -400,11 +414,11 @@ public class PhotoFragment extends Fragment
 
         // RectF первью
         if (widthIsMax) {
-            rectPreview
-                    .set(0, 0, photoProcessor.getPreviewWidth(), photoProcessor.getPreviewHeight());
+            rectPreview.set(0, 0, mPhotoProcessor.getPreviewWidth(),
+                    mPhotoProcessor.getPreviewHeight());
         } else {
-            rectPreview
-                    .set(0, 0, photoProcessor.getPreviewHeight(), photoProcessor.getPreviewWidth());
+            rectPreview.set(0, 0, mPhotoProcessor.getPreviewHeight(),
+                    mPhotoProcessor.getPreviewWidth());
         }
 
         Matrix matrix = new Matrix();
@@ -454,23 +468,23 @@ public class PhotoFragment extends Fragment
         Camera.getCameraInfo(cameraId, info);
 
         if (info.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
-            photoProcessor.setMainCamera(true);
+            mPhotoProcessor.setMainCamera(true);
             result = ((360 - degrees) + info.orientation);
         } else if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            photoProcessor.setMainCamera(false);
+            mPhotoProcessor.setMainCamera(false);
             result = ((360 - degrees) - info.orientation);
             result += 360;
         }
         result = result % 360;
         camera.setDisplayOrientation(result);
-        photoProcessor.setImageRotation(result);
+        mPhotoProcessor.setImageRotation(result);
     }
 
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-        photoProcessor.processFrame(data);
-        camera.addCallbackBuffer(photoProcessor.getCallbackBuffer());
+        mPhotoProcessor.processFrame(data);
+        camera.addCallbackBuffer(mPhotoProcessor.getCallbackBuffer());
     }
 
     @Override
@@ -480,10 +494,10 @@ public class PhotoFragment extends Fragment
         Log.i("LTIMER", "Liveness Delta" + livenessDelta / 1000 + " sec");
 
         if (state < 0 || livenessDelta / 1000 > LIVENESS_TIMEOUT) {
-            if (listener != null) {
+            if (mListener != null) {
                 Log.i("LTIMER", "TIMEOUT!!");
                 ShowMsg = true;
-                listener.onTimeout(FaceNotFoundFragment.Reason.LIVENESS);
+                mListener.onTimeout(FaceNotFoundFragment.Reason.LIVENESS);
             }
         }
 
@@ -552,19 +566,19 @@ public class PhotoFragment extends Fragment
             }
         }
 
-        if (listener != null) {
-            listener.onLivenessResult(state, action);
+        if (mListener != null) {
+            mListener.onLivenessResult(state, action);
         }
     }
 
     @Override
     public boolean isFaceInsideBorder(Rect rect) {
-        if (preferences.getZoomAuth() && checkLiveness) {
+        if (preferences.getZoomAuth() && mCheckLiveness) {
             final int width = preview.getMeasuredWidth();
             final int height = preview.getMeasuredHeight();
 
-            float widthCorrection = ((float) width) / photoProcessor.getPreviewHeight();
-            float heightCorrection = ((float) height) / photoProcessor.getPreviewWidth();
+            float widthCorrection = ((float) width) / mPhotoProcessor.getPreviewHeight();
+            float heightCorrection = ((float) height) / mPhotoProcessor.getPreviewWidth();
 
             int left = (int) (rect.left * widthCorrection);
             int top = (int) (rect.top * heightCorrection);
@@ -586,8 +600,8 @@ public class PhotoFragment extends Fragment
             final int width = preview.getMeasuredWidth();
             final int height = preview.getMeasuredHeight();
 
-            float widthCorrection = ((float) width) / photoProcessor.getPreviewHeight();
-            float heightCorrection = ((float) height) / photoProcessor.getPreviewWidth();
+            float widthCorrection = ((float) width) / mPhotoProcessor.getPreviewHeight();
+            float heightCorrection = ((float) height) / mPhotoProcessor.getPreviewWidth();
 
             int left = (int) (rect.left * widthCorrection);
             int top = (int) (rect.top * heightCorrection);
@@ -596,7 +610,7 @@ public class PhotoFragment extends Fragment
             int bottom = (int) (rect.bottom * heightCorrection);
 
             if (showDetectionRect) {
-                if (preferences.getZoomAuth() && checkLiveness) {
+                if (preferences.getZoomAuth() && mCheckLiveness) {
                     showDetectionRect = false;
                     showDetectionPreference = false;
                     //do not draw rectangle
@@ -654,18 +668,18 @@ public class PhotoFragment extends Fragment
     @Override
     public void onBestFrameReady() {
         //faceInGoodState &&
-        if (faceInGoodState && listener != null) {
+        if (faceInGoodState && mListener != null) {
             ignoreTimeout = true;
-            Log.i("liv", "checkLiveness is " + checkLiveness);
+            Log.i("liv", "checkLiveness is " + mCheckLiveness);
             //check if we are in auth stage
-            if (checkLiveness) {
+            if (mCheckLiveness) {
                 if (preferences.getEyesAuth()) {
 
-                    photoProcessor.setEyeLiveness();
-                    photoProcessor.startCheckLiveness();
+                    mPhotoProcessor.setEyeLiveness();
+                    mPhotoProcessor.startCheckLiveness();
                 } else if (preferences.getZoomAuth()) {
-                    photoProcessor.setZoomLiveness();
-                    photoProcessor.startCheckLivenessZoom();
+                    mPhotoProcessor.setZoomLiveness();
+                    mPhotoProcessor.startCheckLivenessZoom();
                 }
 
                 livenessStart = System.currentTimeMillis();
@@ -674,7 +688,7 @@ public class PhotoFragment extends Fragment
                 submitBestShot();
             }
         } else {
-            photoProcessor.resumeSearch();
+            mPhotoProcessor.resumeSearch();
         }
     }
 
@@ -685,11 +699,11 @@ public class PhotoFragment extends Fragment
 
     @Override
     public void onLivenessWaitingOpenedEyes() {
-        listener.onLivenessWaitingOpenedEyes();
+        mListener.onLivenessWaitingOpenedEyes();
     }
 
     private void submitBestShot() {
-        listener.onBestFrameReady(photoProcessor.getBestShot());
+        mListener.onBestFrameReady(mPhotoProcessor.getBestShot());
     }
 
     @Override
@@ -709,7 +723,7 @@ public class PhotoFragment extends Fragment
             parameters.setFlashMode(flashModeNew);
             camera.setParameters(parameters);
 
-            photoProcessor.setFlashTorchState(state.darknessState == 0 ? true : false);
+            mPhotoProcessor.setFlashTorchState(state.darknessState == 0 ? true : false);
         }
     }
 
@@ -755,7 +769,7 @@ public class PhotoFragment extends Fragment
                     .contains(Camera.Parameters.FLASH_MODE_TORCH);
 
             final Camera.Size bestPreviewSize = getBestPreviewSize();
-            photoProcessor.setPreviewSize(bestPreviewSize.width, bestPreviewSize.height);
+            mPhotoProcessor.setPreviewSize(bestPreviewSize.width, bestPreviewSize.height);
             parameters.setPreviewSize(bestPreviewSize.width, bestPreviewSize.height);
             camera.setParameters(parameters);
         } catch (RuntimeException exception) {
@@ -775,7 +789,7 @@ public class PhotoFragment extends Fragment
         if (camera != null) {
             camera.stopPreview();
             setCameraDisplayOrientation(getCameraID());
-            camera.addCallbackBuffer(photoProcessor.getCallbackBuffer());
+            camera.addCallbackBuffer(mPhotoProcessor.getCallbackBuffer());
             camera.setPreviewCallbackWithBuffer(PhotoFragment.this);
 
             try {
@@ -842,7 +856,7 @@ public class PhotoFragment extends Fragment
             configureCamera();
 
             setCameraDisplayOrientation(getCameraID());
-            camera.addCallbackBuffer(photoProcessor.getCallbackBuffer());
+            camera.addCallbackBuffer(mPhotoProcessor.getCallbackBuffer());
             camera.setPreviewCallbackWithBuffer(PhotoFragment.this);
 
             try {
@@ -852,21 +866,6 @@ public class PhotoFragment extends Fragment
                 e.printStackTrace();
             }
         }
-    }
-
-    public interface Listener {
-
-        void onBestFrameReady(Bitmap bitmap);
-
-        void onTimeout(FaceNotFoundFragment.Reason reason);
-
-        void onNeedCameraPermission();
-
-        void onLivenessWaitingOpenedEyes();
-
-        void onTimeout();
-
-        void onLivenessResult(int state, int action);
     }
 
     class HolderCallback implements SurfaceHolder.Callback {

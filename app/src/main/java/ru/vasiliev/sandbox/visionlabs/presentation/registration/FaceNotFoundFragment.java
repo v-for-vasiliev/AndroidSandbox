@@ -16,13 +16,20 @@ import ru.vasiliev.sandbox.R;
 public class FaceNotFoundFragment extends Fragment {
 
     public enum Reason {
-        NOT_FOUND, LIVENESS
+        NOT_FOUND, LIVENESS;
     }
+
+    public interface Listener {
+
+        void onRetryWhenFaceNotFound();
+    }
+
+    public static final String TAG = FaceNotFoundFragment.class.getName();
 
     @BindView(R.id.reasonTextView)
     TextView reasonTextView;
 
-    private Listener listener;
+    private Listener mListener;
 
     private Reason reason = Reason.NOT_FOUND;
 
@@ -42,7 +49,6 @@ public class FaceNotFoundFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_face_not_found, container, false);
         ButterKnife.bind(this, view);
 
@@ -62,8 +68,8 @@ public class FaceNotFoundFragment extends Fragment {
 
     @OnClick(R.id.retry)
     public void onClick() {
-        if (listener != null) {
-            listener.onRetryClick();
+        if (mListener != null) {
+            mListener.onRetryWhenFaceNotFound();
         }
     }
 
@@ -72,11 +78,6 @@ public class FaceNotFoundFragment extends Fragment {
     }
 
     public void setListener(Listener listener) {
-        this.listener = listener;
-    }
-
-    public interface Listener {
-
-        void onRetryClick();
+        this.mListener = listener;
     }
 }

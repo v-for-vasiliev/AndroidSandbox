@@ -7,7 +7,7 @@ import android.location.Location;
  *
  * @author Kirill Vasiliev
  */
-interface RxLocationCallback {
+public interface RxLocationCallback {
 
     void onLocationChange(Location location);
 

@@ -6,11 +6,17 @@ import dagger.Module;
 import dagger.Provides;
 import proxypref.ProxyPreferences;
 import ru.vasiliev.sandbox.di.scopes.VisionLabsScope;
+import ru.vasiliev.sandbox.visionlabs.data.VisionLabsPreferences;
+import ru.vasiliev.sandbox.visionlabs.data.VisionLabsRegistrationApi;
+import ru.vasiliev.sandbox.visionlabs.data.VisionLabsRegistrationApiLocalImpl;
+import ru.vasiliev.sandbox.visionlabs.data.VisionLabsVerifyApi;
+import ru.vasiliev.sandbox.visionlabs.data.VisionLabsVerifyApiLocalImpl;
 import ru.vasiliev.sandbox.visionlabs.domain.VisionLabsInteractor;
 import ru.vasiliev.sandbox.visionlabs.domain.VisionLabsInteractorImpl;
-import ru.vasiliev.sandbox.visionlabs.repository.VisionLabsPreferences;
 import ru.visionlab.Resources;
 import ru.visionlab.faceengine.PhotoProcessor;
+
+import static ru.vasiliev.sandbox.visionlabs.domain.VisionLabsConfig.PREFERENCES_FILE_NAME;
 
 @Module
 public class VisionLabsModule {
@@ -32,7 +38,21 @@ public class VisionLabsModule {
     @VisionLabsScope
     @Provides
     VisionLabsPreferences providePreferences(Context context) {
-        return ProxyPreferences
-                .build(VisionLabsPreferences.class, context.getSharedPreferences("preferences", 0));
+        return ProxyPreferences.build(VisionLabsPreferences.class,
+                context.getSharedPreferences(PREFERENCES_FILE_NAME, 0));
+    }
+
+    @VisionLabsScope
+    @Provides
+    VisionLabsVerifyApi provideVerifyApi(PhotoProcessor photoProcessor,
+            VisionLabsPreferences preferences) {
+        return new VisionLabsVerifyApiLocalImpl(photoProcessor, preferences);
+    }
+
+    @VisionLabsScope
+    @Provides
+    VisionLabsRegistrationApi provideRegistrationApi(PhotoProcessor photoProcessor,
+            VisionLabsPreferences preferences) {
+        return new VisionLabsRegistrationApiLocalImpl(photoProcessor, preferences);
     }
 }

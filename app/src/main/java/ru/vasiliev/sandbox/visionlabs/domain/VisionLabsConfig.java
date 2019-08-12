@@ -2,6 +2,8 @@ package ru.vasiliev.sandbox.visionlabs.domain;
 
 public class VisionLabsConfig {
 
+    public static final String PREFERENCES_FILE_NAME = "preferences";
+
     public static final String ENDPOINT_LUNA2 = "https://luna3api.faceis.ru";
 
     public static final String ENDPOINT_LUNA1 = "http://visionlabs.faceis.ru:8080";

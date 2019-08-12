@@ -1,4 +1,4 @@
-package ru.vasiliev.sandbox.location;
+package ru.vasiliev.sandbox.location.presentation;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -21,6 +21,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 
 import ru.vasiliev.sandbox.App;
+import ru.vasiliev.sandbox.location.RxLocationCallback;
+import ru.vasiliev.sandbox.location.RxLocationProvider;
 import rx.Observable;
 
 /**

@@ -22,18 +22,27 @@ import ru.vasiliev.sandbox.R;
 
 public class SavePhotoFragment extends Fragment {
 
+    public interface Listener {
+
+        void onRetryWhenPhotoAccepted();
+
+        void onRegisterUser();
+    }
+
+    public static final String TAG = SavePhotoFragment.class.getName();
+
     @BindView(R.id.photo)
-    RoundedImageView photo;
+    RoundedImageView mPhotoPreview;
 
-    Bitmap bitmap;
+    Bitmap mBitmap;
 
-    Listener listener;
+    Listener mListener;
 
     @BindView(R.id.save)
-    Button save;
+    Button mButtonSave;
 
     @BindView(R.id.progressBar)
-    ProgressBar progressBar;
+    ProgressBar mProgress;
 
     public SavePhotoFragment() {
 
@@ -44,11 +53,11 @@ public class SavePhotoFragment extends Fragment {
     }
 
     public void setListener(Listener listener) {
-        this.listener = listener;
+        this.mListener = listener;
     }
 
-    public void setPhoto(Bitmap bitmap) {
-        this.bitmap = bitmap;
+    public void setPhotoPreview(Bitmap bitmap) {
+        this.mBitmap = bitmap;
     }
 
     @Override
@@ -67,39 +76,26 @@ public class SavePhotoFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        photo.setImageBitmap(bitmap);
-        bitmap = null;
-        progressBar.getIndeterminateDrawable()
+        mPhotoPreview.setImageBitmap(mBitmap);
+        mBitmap = null;
+        mProgress.getIndeterminateDrawable()
                 .setColorFilter(ContextCompat.getColor(getContext(), R.color.accentColor),
                         PorterDuff.Mode.MULTIPLY);
     }
 
-    @Override
-    public String toString() {
-        return "Save Photo Fragment";
-    }
-
     @OnClick({R.id.retry})
     public void onRetryClick() {
-        if (listener != null) {
-            listener.onRetryClick();
+        if (mListener != null) {
+            mListener.onRetryWhenPhotoAccepted();
         }
     }
 
     @OnClick({R.id.save})
     public void onClick() {
-        save.setEnabled(false);
-        progressBar.setVisibility(View.VISIBLE);
-        if (listener != null) {
-            listener.onSaveClick();
+        mButtonSave.setEnabled(false);
+        mProgress.setVisibility(View.VISIBLE);
+        if (mListener != null) {
+            mListener.onRegisterUser();
         }
     }
-
-    public interface Listener {
-
-        void onRetryClick();
-
-        void onSaveClick();
-    }
-
 }

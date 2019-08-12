@@ -11,7 +11,11 @@ interface VisionLabsView extends MvpView {
 
     void showLoader();
 
-    void onEngineLoadFinished(boolean result);
+    void hideLoader();
 
-    void onEngineLoadError(Throwable t);
+    void showRegistration();
+
+    void showAuth();
+
+    void onEngineLoadError();
 }

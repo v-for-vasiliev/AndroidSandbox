@@ -1,4 +1,4 @@
-package ru.vasiliev.sandbox.visionlabs.repository;
+package ru.vasiliev.sandbox.visionlabs.data;
 
 import proxypref.annotation.DefaultBoolean;
 import proxypref.annotation.DefaultString;
@@ -9,16 +9,6 @@ public interface VisionLabsPreferences {
     Boolean getFirstRun();
 
     void setFirstRun(Boolean value);
-
-    @DefaultBoolean(true)
-    Boolean getFaceAuth();
-
-    void setFaceAuth(Boolean value);
-
-    @DefaultBoolean(false)
-    Boolean getFingerAuth();
-
-    void setFingerAuth(Boolean value);
 
     @DefaultBoolean(true)
     Boolean getLivenessAuth();
@@ -48,21 +38,6 @@ public interface VisionLabsPreferences {
 
     void setShowDetection(Boolean value);
 
-    @DefaultBoolean(true)
-    Boolean getSavePhoto();
-
-    void setSavePhoto(Boolean value);
-
-    @DefaultString("")
-    String getPin();
-
-    void setPin(String string);
-
-    @DefaultString("")
-    String getUsername();
-
-    void setUsername(String string);
-
     String getStartTime();
 
     void setStartTime(String time);
@@ -77,8 +52,8 @@ public interface VisionLabsPreferences {
 
     void setIgnoreEyes(Boolean ignoreEyes);
 
-    @DefaultBoolean(true)
-    Boolean getLuna2();
+    @DefaultString("")
+    String getAuthDescriptor();
 
-    void setLuna2(Boolean val);
+    void setAuthDescriptor(String descriptor);
 }
