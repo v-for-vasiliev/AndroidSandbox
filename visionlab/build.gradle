@@ -1,0 +1,61 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 27
+    buildToolsVersion '28.0.3'
+
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 26
+        versionCode 1
+        versionName "2.4.2"
+
+        externalNativeBuild {
+            cmake {
+                cppFlags "-DWITH_LIVENESS -std=c++11 -frtti -DWITH_FSDK"
+                abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86'
+
+                // SDK directory should be next to the project directory
+                arguments "-DANDROID_STL=c++_shared",
+                        "-DFSDK_ROOT=$projectDir/../../luna_sdk",
+                        "-DPHOTOMAKER_ROOT=$projectDir/../../luna_sdk/examples"
+
+                abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86'
+            }
+        }
+
+        sourceSets.main {
+            jniLibs.srcDir "$projectDir/../../luna_sdk/lib/clang"
+            jniLibs.srcDir "$projectDir/../../luna_sdk/examples/lib/clang"
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/jni/CMakeLists.txt"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation 'com.android.support:support-v4:27.1.1'
+}

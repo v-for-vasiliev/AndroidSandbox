@@ -1,7 +1,7 @@
 package ru.vasiliev.sandbox.di.modules;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
-
 import dagger.Module;
 import dagger.Provides;
 import ru.vasiliev.sandbox.App;
@@ -25,5 +25,11 @@ public class AppModule {
     @Provides
     App provideApp() {
         return mApp;
+    }
+
+    @AppScope
+    @Provides
+    Context provideContext() {
+        return mApp.getApplicationContext();
     }
 }

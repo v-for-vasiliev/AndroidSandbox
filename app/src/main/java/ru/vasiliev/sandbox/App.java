@@ -16,8 +16,7 @@ public class App extends Application {
 
     private static App sInstance;
 
-    private static AppComponent sAppComponent;
-
+    private static ComponentManager sComponentManager;
 
     @Override
     public void onCreate() {
@@ -29,7 +28,10 @@ public class App extends Application {
 
     private void init() {
         // Dagger application component
-        sAppComponent = DaggerAppComponent.builder().appModule(new AppModule(this)).build();
+        AppComponent appComponent = DaggerAppComponent.builder().appModule(new AppModule(this))
+                .build();
+
+        sComponentManager = new ComponentManager(appComponent);
 
         Timber.plant(new Timber.DebugTree());
     }
@@ -38,7 +40,7 @@ public class App extends Application {
         return sInstance;
     }
 
-    public static AppComponent getAppComponent() {
-        return sAppComponent;
+    public static ComponentManager getComponentManager() {
+        return sComponentManager;
     }
 }

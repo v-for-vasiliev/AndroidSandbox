@@ -52,7 +52,7 @@ android {
 }
 
 dependencies {
-    implementation project(path: ':visionlabs')
+    implementation project(path: ':visionlab')
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 

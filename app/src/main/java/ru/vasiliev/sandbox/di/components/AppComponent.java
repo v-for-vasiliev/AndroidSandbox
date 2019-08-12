@@ -19,4 +19,6 @@ public interface AppComponent {
     App getApp();
 
     LocationServices getLocationServices();
+
+    VisionLabsComponent plusVisionLabsComponent();
 }

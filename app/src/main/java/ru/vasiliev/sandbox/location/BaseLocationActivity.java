@@ -69,7 +69,8 @@ public abstract class BaseLocationActivity extends MvpAppCompatActivity
         }
         */
 
-        mRxLocationProvider = App.getAppComponent().getLocationServices().getLocationProvider();
+        mRxLocationProvider = App.getComponentManager().getAppComponent().getLocationServices()
+                .getLocationProvider();
     }
 
     @Override
