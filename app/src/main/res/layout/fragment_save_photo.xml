@@ -44,8 +44,7 @@
             android:textColor="@color/accentColor"
             android:textSize="14sp"/>
 
-    <Button
-            android:id="@+id/save"
+    <Button android:id="@+id/save"
             android:layout_width="match_parent"
             android:layout_height="@dimen/button_height"
             android:layout_alignParentBottom="true"
@@ -54,6 +53,7 @@
             android:background="@color/accentColor"
             android:text="@string/Ok"
             android:textColor="@android:color/white"
-            android:textSize="14sp"/>
+            android:textSize="14sp"
+            android:elevation="2dp"/>
 
 </RelativeLayout>

@@ -4,10 +4,14 @@ import com.arellomobile.mvp.MvpView;
 import com.arellomobile.mvp.viewstate.strategy.AddToEndSingleStrategy;
 import com.arellomobile.mvp.viewstate.strategy.StateStrategyType;
 
+import ru.vasiliev.sandbox.visionlabs.presentation.registration.FaceNotFoundFragment;
+
 @StateStrategyType(AddToEndSingleStrategy.class)
 interface VisionLabsView extends MvpView {
 
     void requestPermissions();
+
+    void onEngineLoadError();
 
     void showLoader();
 
@@ -17,5 +21,9 @@ interface VisionLabsView extends MvpView {
 
     void showAuth();
 
-    void onEngineLoadError();
+    void showPreview();
+
+    void showFaceNotFound(FaceNotFoundFragment.Reason reason);
+
+    void showFaceNotFoundWarn();
 }

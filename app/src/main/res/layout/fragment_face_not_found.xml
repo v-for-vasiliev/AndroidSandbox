@@ -1,32 +1,34 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                android:layout_marginStart="@dimen/activity_horizontal_margin"
-                tools:context="">
+                android:layout_marginStart="@dimen/activity_horizontal_margin">
 
     <TextView
-        android:id="@+id/reasonTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:drawablePadding="41dp"
-        android:drawableTop="@drawable/ic_face_not_found"
-        android:gravity="center_horizontal"
-        android:text="@string/error_face_not_found"
-        android:textColor="@color/colorRed"
-        android:textSize="15sp"/>
+            android:id="@+id/reasonTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:drawablePadding="41dp"
+            android:drawableTop="@drawable/ic_face_not_found"
+            android:drawableTint="@android:color/black"
+            android:gravity="center_horizontal"
+            android:text="@string/error_face_not_found"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-light"/>
 
     <Button
-        style="@style/Widget.AppCompat.Button.Borderless"
-        android:id="@+id/retry"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/button_height"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="@dimen/button_margin_bottom"
-        android:text="@string/retry"
-        android:textColor="@color/accentColor"
-        android:textSize="14sp"/>
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:id="@+id/retry"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/button_height"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="@dimen/button_margin_bottom"
+            android:text="@string/retry"
+            android:background="@color/accentColor"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:elevation="2dp"/>
 
 </RelativeLayout>

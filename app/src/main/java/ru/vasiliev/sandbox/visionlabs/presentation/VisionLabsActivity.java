@@ -15,12 +15,10 @@ import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
 import ru.vasiliev.sandbox.R;
 import ru.vasiliev.sandbox.visionlabs.data.VisionLabsRegistrationApi;
@@ -35,34 +33,14 @@ import ru.vasiliev.sandbox.visionlabs.presentation.common.PhotoFragment;
 import ru.vasiliev.sandbox.visionlabs.presentation.registration.FaceNotFoundFragment;
 import ru.vasiliev.sandbox.visionlabs.presentation.registration.SavePhotoFragment;
 
-import static ru.vasiliev.sandbox.visionlabs.presentation.VisionLabsPresenter.Mode.AUTH;
-import static ru.vasiliev.sandbox.visionlabs.presentation.VisionLabsPresenter.Mode.REGISTRATION;
-
 public class VisionLabsActivity extends MvpAppCompatActivity
         implements VisionLabsView, PhotoFragment.Listener, SavePhotoFragment.Listener,
         FaceNotFoundFragment.Listener, VisionLabsVerifyApi.Listener,
         VisionLabsRegistrationApi.Listener, FaceNotRecognizedFragment.Listener {
 
-    @BindView(R.id.output)
-    TextView mOutput;
-
     private ProgressDialog mProgress;
 
-    private Bitmap mBitmap;
-
     private int mFaceAuthFailsCount;
-
-    private long verifStartTime;
-
-    private long verifEndTime;
-
-    private PhotoFragment mPhotoFragment;
-
-    private FaceNotFoundFragment mFaceNotFoundFragment;
-
-    private SavePhotoFragment mSavePhotoFragment;
-
-    private FaceNotRecognizedFragment mFaceNotRecognizedFragment;
 
     @InjectPresenter
     VisionLabsPresenter mPresenter;
@@ -92,22 +70,20 @@ public class VisionLabsActivity extends MvpAppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        mPresenter.getRegistrationApi().setListener(this);
-        mPresenter.getVerifyApi().setListener(this);
+        mPresenter.init();
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        mPresenter.getRegistrationApi().setListener(null);
-        mPresenter.getVerifyApi().setListener(null);
+    protected void onDestroy() {
+        super.onDestroy();
+        mPresenter.releaseComponent();
     }
 
     @Override
     public void onBackPressed() {
         mPresenter.getPreferences().setStartTime(String.valueOf(System.currentTimeMillis()));
         if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
-            getSupportFragmentManager().popBackStack();
+            popupFragment(PhotoFragment.TAG);
         } else {
             finish();
         }
@@ -122,25 +98,11 @@ public class VisionLabsActivity extends MvpAppCompatActivity
                 }
                 if (!mPresenter.isEngineLoaded()) {
                     mPresenter.loadEngine();
-                } else {
-                    mPresenter.onEngineLoadedSucceeded();
                 }
             } else {
                 onEngineLoadError();
             }
         });
-    }
-
-    @Override
-    public void showLoader() {
-        if (!mProgress.isShowing()) {
-            mProgress.show();
-        }
-    }
-
-    @Override
-    public void hideLoader() {
-        mProgress.dismiss();
     }
 
     @Override
@@ -156,76 +118,71 @@ public class VisionLabsActivity extends MvpAppCompatActivity
     }
 
     @Override
+    public void showLoader() {
+        if (!mProgress.isShowing()) {
+            mProgress.show();
+        }
+    }
+
+    @Override
+    public void hideLoader() {
+        mProgress.dismiss();
+    }
+
+    @Override
     public void showRegistration() {
         hideLoader();
-        if (mPhotoFragment == null) {
-            mPhotoFragment = PhotoFragment.newInstance();
-        }
-        mPhotoFragment.setListener(this);
-        mPhotoFragment.setPhotoProcessor(mPresenter.getPhotoProcessor());
-        mPhotoFragment.enableLivenessCheck(false);
-
+        PhotoFragment fragment = PhotoFragment.newInstance();
+        fragment.setPhotoProcessor(mPresenter.getPhotoProcessor());
+        fragment.setListener(this);
+        fragment.enableLivenessCheck(false);
         mPresenter.getPreferences().setStartTime(String.valueOf(System.currentTimeMillis()));
         mPresenter.getPreferences().setNeedPortrait(false);
-
-        showFragment(mPhotoFragment, PhotoFragment.TAG);
+        showFragment(fragment, PhotoFragment.TAG);
     }
 
     @Override
     public void showAuth() {
         hideLoader();
-        if (mPhotoFragment == null) {
-            mPhotoFragment = PhotoFragment.newInstance();
-        }
-
-        mPhotoFragment.setListener(this);
-        mPhotoFragment.setPhotoProcessor(mPresenter.getPhotoProcessor());
-        mPhotoFragment.enableLivenessCheck(mPresenter.getPreferences().getLivenessAuth());
-
+        PhotoFragment fragment = PhotoFragment.newInstance();
+        fragment.setListener(this);
+        fragment.setPhotoProcessor(mPresenter.getPhotoProcessor());
+        fragment.enableLivenessCheck(mPresenter.getPreferences().getLivenessAuth());
         mPresenter.getPreferences().setStartTime(String.valueOf(System.currentTimeMillis()));
         mPresenter.getPreferences().setNeedPortrait(true);
-
-        showFragment(mPhotoFragment, PhotoFragment.TAG);
+        showFragment(fragment, PhotoFragment.TAG);
     }
 
     @Override
-    public void onBestFrameReady(Bitmap bitmap) {
-        if (mPresenter.getMode() == REGISTRATION) {
-            mBitmap = bitmap;
-            if (mSavePhotoFragment == null) {
-                mSavePhotoFragment = SavePhotoFragment.newInstance();
-            }
-            mSavePhotoFragment.setPhotoPreview(mBitmap);
-            mSavePhotoFragment.setListener(this);
-            showFragment(mSavePhotoFragment, SavePhotoFragment.TAG);
-        } else if (mPresenter.getMode() == AUTH) {
-            verifStartTime = System.nanoTime();
-            mPresenter.getVerifyApi().verifyPerson();
-        }
+    public void showPreview() {
+        SavePhotoFragment fragment = SavePhotoFragment.newInstance();
+        fragment.setPhotoPreview(mPresenter.getFrame());
+        fragment.setListener(this);
+        showFragment(fragment, SavePhotoFragment.TAG);
+    }
+
+    @Override
+    public void showFaceNotFound(FaceNotFoundFragment.Reason reason) {
+        FaceNotFoundFragment fragment = FaceNotFoundFragment.newInstance();
+        fragment.setReason(reason);
+        fragment.setListener(this);
+        showFragment(fragment, FaceNotFoundFragment.TAG);
+    }
+
+    @Override
+    public void showFaceNotFoundWarn() {
+        Toast.makeText(this, R.string.access_denied, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onBestFrameReady(Bitmap frame) {
+        mPresenter.onBestFrameReady(frame);
     }
 
     @Override
     public void onTimeout(FaceNotFoundFragment.Reason reason) {
-        if (mPresenter.getMode() == REGISTRATION) {
-            if (mFaceNotFoundFragment == null) {
-                mFaceNotFoundFragment = FaceNotFoundFragment.newInstance();
-            }
-            mFaceNotFoundFragment.setReason(reason);
-            mFaceNotFoundFragment.setListener(this);
-            showFragment(mFaceNotFoundFragment, FaceNotFoundFragment.TAG);
-        } else if (mPresenter.getMode() == AUTH) {
-            mFaceAuthFailsCount++;
-            if (mFaceAuthFailsCount < 5) {
-                if (mFaceNotFoundFragment == null) {
-                    mFaceNotFoundFragment = FaceNotFoundFragment.newInstance();
-                }
-                mFaceNotFoundFragment.setReason(reason);
-                mFaceNotFoundFragment.setListener(this);
-                showFragment(mFaceNotFoundFragment, FaceNotFoundFragment.TAG);
-            } else {
-                Toast.makeText(this, R.string.access_denied, Toast.LENGTH_SHORT).show();
-            }
-        }
+        mPresenter.onTimeout(reason);
+
     }
 
     @Override
@@ -245,17 +202,17 @@ public class VisionLabsActivity extends MvpAppCompatActivity
 
     @Override
     public void onRetryWhenFaceNotRecognized() {
-        popupFragment(PhotoFragment.TAG);
+        mPresenter.onRetry();
     }
 
     @Override
     public void onRetryWhenFaceNotFound() {
-        popupFragment(PhotoFragment.TAG);
+        mPresenter.onRetry();
     }
 
     @Override
     public void onRetryWhenPhotoAccepted() {
-        popupFragment(PhotoFragment.TAG);
+        mPresenter.onRetry();
     }
 
     @Override
@@ -285,7 +242,7 @@ public class VisionLabsActivity extends MvpAppCompatActivity
 
     @Override
     public void onVerificationSuccess(SearchResult searchResult) {
-        verifEndTime = System.nanoTime();
+        mPresenter.setVerificationEndTime(System.nanoTime());
         final List<SearchResultPerson> persons = searchResult.getPersons();
         if (persons != null && !persons.isEmpty()) {
             final SearchResultPerson person = persons.get(0);
@@ -315,7 +272,8 @@ public class VisionLabsActivity extends MvpAppCompatActivity
             fragment.setListener(this);
             if (reason == AuthFailReason.SIMILARITY) {
                 fragment.setVerificationTime(
-                        (int) ((double) (verifEndTime - verifStartTime) / 1e6));
+                        (int) ((double) (mPresenter.getVerificationEndTime() - mPresenter
+                                .getVerificationStartTime()) / 1e6));
             }
             fragment.setFailReason(reason);
             showFragment(fragment, FaceNotRecognizedFragment.TAG);
@@ -336,8 +294,7 @@ public class VisionLabsActivity extends MvpAppCompatActivity
     private synchronized void showFragment(Fragment fragment, String tag) {
         if (!popupFragment(tag)) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, fragment, fragment.toString()).addToBackStack(tag)
-                    .commit();
+                    .replace(R.id.container, fragment, fragment.toString()).commit();
         }
     }
 
