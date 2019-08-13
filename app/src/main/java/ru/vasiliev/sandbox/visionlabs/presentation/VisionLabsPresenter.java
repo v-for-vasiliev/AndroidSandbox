@@ -15,6 +15,7 @@ import ru.vasiliev.sandbox.App;
 import ru.vasiliev.sandbox.mvp.MvpBasePresenter;
 import ru.vasiliev.sandbox.visionlabs.data.VisionLabsPreferences;
 import ru.vasiliev.sandbox.visionlabs.data.VisionLabsRegistrationApi;
+import ru.vasiliev.sandbox.visionlabs.data.VisionLabsRegistrationApiLocalImpl;
 import ru.vasiliev.sandbox.visionlabs.data.VisionLabsVerifyApi;
 import ru.vasiliev.sandbox.visionlabs.domain.VisionLabsInteractor;
 import ru.vasiliev.sandbox.visionlabs.presentation.registration.FaceNotFoundFragment;
@@ -116,6 +117,11 @@ public class VisionLabsPresenter extends MvpBasePresenter<VisionLabsView> {
 
     private Mode getMode() {
         return TextUtils.isEmpty(mPreferences.getAuthDescriptor()) ? Mode.REGISTRATION : Mode.AUTH;
+    }
+
+    void registerUser(VisionLabsRegistrationApi.Listener listener) {
+        new VisionLabsRegistrationApiLocalImpl(mPhotoProcessor, mPreferences).setListener(listener)
+                .registerPerson();
     }
 
     void onBestFrameReady(Bitmap frame) {

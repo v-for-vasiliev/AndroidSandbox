@@ -1,7 +1,6 @@
 package ru.vasiliev.sandbox.visionlabs.data;
 
 import android.util.Base64;
-
 import ru.visionlab.faceengine.PhotoProcessor;
 
 public class VisionLabsRegistrationApiLocalImpl implements VisionLabsRegistrationApi {
@@ -20,14 +19,15 @@ public class VisionLabsRegistrationApiLocalImpl implements VisionLabsRegistratio
     }
 
     public VisionLabsRegistrationApiLocalImpl(PhotoProcessor photoProcessor,
-            VisionLabsPreferences preferences) {
+                                              VisionLabsPreferences preferences) {
         mPhotoProcessor = photoProcessor;
         mPreferences = preferences;
     }
 
     @Override
-    public void setListener(VisionLabsRegistrationApi.Listener listener) {
+    public VisionLabsRegistrationApi setListener(VisionLabsRegistrationApi.Listener listener) {
         mListener = listener;
+        return this;
     }
 
     @Override

@@ -4,7 +4,7 @@ public interface VisionLabsRegistrationApi {
 
     void registerPerson();
 
-    void setListener(Listener listener);
+    VisionLabsRegistrationApi setListener(Listener listener);
 
     interface Listener {
 

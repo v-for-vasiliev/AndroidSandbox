@@ -93,7 +93,7 @@ public class SavePhotoFragment extends Fragment {
     @OnClick({R.id.save})
     public void onClick() {
         mButtonSave.setEnabled(false);
-        mProgress.setVisibility(View.VISIBLE);
+        //mProgress.setVisibility(View.VISIBLE);
         if (mListener != null) {
             mListener.onRegisterUser();
         }

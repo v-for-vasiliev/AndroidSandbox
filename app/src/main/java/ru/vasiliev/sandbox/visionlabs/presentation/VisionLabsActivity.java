@@ -217,7 +217,7 @@ public class VisionLabsActivity extends MvpAppCompatActivity
 
     @Override
     public void onRegisterUser() {
-        mPresenter.getRegistrationApi().registerPerson();
+        mPresenter.registerUser(this);
     }
 
     @Override
