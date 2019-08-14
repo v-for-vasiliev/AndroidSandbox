@@ -51,17 +51,19 @@ public class VisionLabsPresenter extends MvpBasePresenter<VisionLabsView>
     @Inject
     VisionLabsPreferences mPreferences;
 
+    private Context mContext;
+
+    private boolean mEngineLoaded = false;
+
     private PhotoProcessor mPhotoProcessor;
 
     private VisionLabsRegistrationApi mRegistrationApi;
 
     private VisionLabsVerificationApi mVerificationApi;
 
-    private boolean mEngineLoaded = false;
-
-    private Context mContext;
-
     private Bitmap mFrame;
+
+    private boolean mFaceAuthSucceeded;
 
     private long mVerificationStartTime;
 
@@ -121,6 +123,7 @@ public class VisionLabsPresenter extends MvpBasePresenter<VisionLabsView>
             getViewState().showRegistration();
         } else {
             mFaceAuthFailsCount = 0;
+            mFaceAuthSucceeded = false;
             getViewState().showAuth();
         }
     }
@@ -211,7 +214,10 @@ public class VisionLabsPresenter extends MvpBasePresenter<VisionLabsView>
         if (persons != null && !persons.isEmpty()) {
             final SearchResultPerson person = persons.get(0);
             if (person.similarity > VisionLabsConfig.MIN_SIMILARITY) {
-                getViewState().onFaceAuthSucceeded();
+                if (!mFaceAuthSucceeded) {
+                    mFaceAuthSucceeded = true;
+                    getViewState().onFaceAuthSucceeded();
+                }
             } else {
                 countFailedAuthAttempts(AuthFailReason.SIMILARITY);
             }
