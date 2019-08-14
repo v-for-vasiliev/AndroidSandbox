@@ -4,16 +4,13 @@ package ru.vasiliev.sandbox.visionlabs.presentation.registration;
 import com.makeramen.roundedimageview.RoundedImageView;
 
 import android.graphics.Bitmap;
-import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ProgressBar;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -40,9 +37,6 @@ public class SavePhotoFragment extends Fragment {
 
     @BindView(R.id.save)
     Button mButtonSave;
-
-    @BindView(R.id.progressBar)
-    ProgressBar mProgress;
 
     public SavePhotoFragment() {
 
@@ -78,9 +72,6 @@ public class SavePhotoFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mPhotoPreview.setImageBitmap(mBitmap);
         mBitmap = null;
-        mProgress.getIndeterminateDrawable()
-                .setColorFilter(ContextCompat.getColor(getContext(), R.color.accentColor),
-                        PorterDuff.Mode.MULTIPLY);
     }
 
     @OnClick({R.id.retry})

@@ -9,7 +9,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
-import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
@@ -17,7 +16,6 @@ import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,10 +25,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -78,43 +73,34 @@ public class PhotoFragment extends Fragment
     protected static final int LIVENESS_TIMEOUT = 15;
 
     @BindView(R.id.warning)
-    TextView warning;
+    TextView mWarning;
 
-    @BindView(R.id.ZOOM_STATE)
-    TextView zoom_state;
+    @BindView(R.id.liveness_action)
+    TextView mLivenessActionText;
 
-    @BindView(R.id.maskedView)
-    ImageView mask;
+    @BindView(R.id.face_mask)
+    ImageView mMaskImage;
 
     @BindView(R.id.preview)
-    SurfaceView preview;
+    SurfaceView mPreview;
 
-    @BindView(R.id.faceBoundView)
-    FaceBoundSurfaceView faceBoundView;
+    @BindView(R.id.face_bound_view)
+    FaceBoundSurfaceView mFaceBoundSurfaceView;
 
-    @BindView(R.id.sendPlaceholder)
-    FrameLayout sendPlaceholder;
-
-    @BindView(R.id.layout1)
-    LinearLayout layout1;
-
-    @BindView(R.id.progressBar)
-    ProgressBar progressBar;
-
-    @BindView(R.id.timelog)
-    TextView timelog;
+    @BindView(R.id.verification_time)
+    TextView mVerificationTimeText;
 
     @BindView(R.id.flipCam)
-    ImageView flipCamView;
+    ImageView mFlipCameraButton;
 
     @Inject
-    VisionLabsPreferences preferences;
+    VisionLabsPreferences mVisionLabsPreferences;
 
     PhotoProcessor mPhotoProcessor;
 
-    HolderCallback holderCallback;
+    HolderCallback mHolderCallback;
 
-    Camera camera;
+    Camera mCamera;
 
     boolean MASKBIG = false;
 
@@ -133,7 +119,7 @@ public class PhotoFragment extends Fragment
     boolean faceInGoodState;
 
     boolean ShowMsg = true;
-    
+
     private Listener mListener;
 
     private boolean ignoreTimeout;
@@ -146,9 +132,9 @@ public class PhotoFragment extends Fragment
 
     private boolean cameraFlashIsSupported = false;
 
-    private int cameraID = -1;
+    private int mCameraId = -1;
 
-    private int cameraFacing = -1;
+    private int mCameraFacing = -1;
 
     private long livenessDelta = 0;
 
@@ -188,51 +174,42 @@ public class PhotoFragment extends Fragment
             Bundle savedInstanceState) {
         boolean useFrontCamera = false;
 
-        if (preferences.getUseFrontCamera()) {
-
+        if (mVisionLabsPreferences.getUseFrontCamera()) {
             int cameraIdTmp = getCameraIdWithFacing(Camera.CameraInfo.CAMERA_FACING_FRONT);
-
             if (cameraIdTmp == -1) {
                 useFrontCamera = false;
             } else {
                 useFrontCamera = true;
-                cameraID = cameraIdTmp;
-                cameraFacing = Camera.CameraInfo.CAMERA_FACING_FRONT;
+                mCameraId = cameraIdTmp;
+                mCameraFacing = Camera.CameraInfo.CAMERA_FACING_FRONT;
             }
         }
 
         if (!useFrontCamera) {
-            cameraFacing = Camera.CameraInfo.CAMERA_FACING_BACK;
-            cameraID = getCameraIdWithFacing(Camera.CameraInfo.CAMERA_FACING_BACK);
+            mCameraFacing = Camera.CameraInfo.CAMERA_FACING_BACK;
+            mCameraId = getCameraIdWithFacing(Camera.CameraInfo.CAMERA_FACING_BACK);
         }
 
         View view = inflater.inflate(R.layout.fragment_photo, container, false);
         ButterKnife.bind(this, view);
 
-        flipCamView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                flipCam();
-            }
-        });
+        mFlipCameraButton.setOnClickListener(flipCamView -> flipCam());
 
         return view;
     }
 
     public void showWaitState() {
-        mask.setVisibility(View.GONE);
-        sendPlaceholder.setVisibility(View.VISIBLE);
-        camera.stopPreview();
+        mCamera.stopPreview();
     }
 
     public void hideWaitState() {
-        if (preferences.getZoomAuth()
-                && mCheckLiveness) {//set mask to visible in auth stage if zoom liveness is enabled
-            mask.setVisibility(View.VISIBLE);
+        // Set mask to visible in auth stage if zoom liveness is enabled
+        if (mVisionLabsPreferences.getZoomAuth() && mCheckLiveness) {
+            mMaskImage.setVisibility(View.VISIBLE);
         } else {
-            mask.setVisibility(preferences.getShowDetection() ? View.INVISIBLE : View.VISIBLE);
+            mMaskImage.setVisibility(
+                    mVisionLabsPreferences.getShowDetection() ? View.INVISIBLE : View.VISIBLE);
         }
-        sendPlaceholder.setVisibility(View.GONE);
     }
 
     private void detectMaskDimensions(Bitmap bitmap) {
@@ -264,18 +241,18 @@ public class PhotoFragment extends Fragment
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         getActivity().setTitle(R.string.fragment_photo_title);
-        zoom_state.setTextColor(Color.parseColor("#551A8B"));//dark purple
 
         if (!mCheckLiveness) {
             MASKBIG = false;
             MASKMEDIUM = true;
             MASKSMALL = false;
             Picasso.with(getContext()).load(R.drawable.mask).centerCrop().fit()
-                    .into(mask, new Callback() {
+                    .into(mMaskImage, new Callback() {
 
                         @Override
                         public void onSuccess() {
-                            final Bitmap bitmap = ((BitmapDrawable) mask.getDrawable()).getBitmap();
+                            final Bitmap bitmap = ((BitmapDrawable) mMaskImage.getDrawable())
+                                    .getBitmap();
                             detectMaskDimensions(bitmap);
                         }
 
@@ -285,17 +262,17 @@ public class PhotoFragment extends Fragment
                         }
                     });
         } else {
-            if (preferences.getZoomAuth()) {
+            if (mVisionLabsPreferences.getZoomAuth()) {
                 MASKBIG = false;
                 MASKMEDIUM = false;
                 MASKSMALL = true;
-                zoom_state.setVisibility(View.VISIBLE);
-                zoom_state.setText(R.string.zoom_out_and_look_straight_at_the_camera);
+                mLivenessActionText.setVisibility(View.VISIBLE);
+                mLivenessActionText.setText(R.string.zoom_out_and_look_straight_at_the_camera);
                 Picasso.with(getContext()).load(R.drawable.mask_small).centerCrop().fit()
-                        .into(mask, new Callback() {
+                        .into(mMaskImage, new Callback() {
                             @Override
                             public void onSuccess() {
-                                final Bitmap bitmap = ((BitmapDrawable) mask.getDrawable())
+                                final Bitmap bitmap = ((BitmapDrawable) mMaskImage.getDrawable())
                                         .getBitmap();
                                 detectMaskDimensions(bitmap);
                             }
@@ -305,16 +282,17 @@ public class PhotoFragment extends Fragment
 
                             }
                         });
-            } else if (preferences.getEyesAuth() && (!preferences.getShowDetection())) {
+            } else if (mVisionLabsPreferences.getEyesAuth() && (!mVisionLabsPreferences
+                    .getShowDetection())) {
                 MASKBIG = false;
                 MASKMEDIUM = true;
                 MASKSMALL = false;
                 Log.i("MASK", "Drawing medium mask");
                 Picasso.with(getContext()).load(R.drawable.mask).centerCrop().fit()
-                        .into(mask, new Callback() {
+                        .into(mMaskImage, new Callback() {
                             @Override
                             public void onSuccess() {
-                                final Bitmap bitmap = ((BitmapDrawable) mask.getDrawable())
+                                final Bitmap bitmap = ((BitmapDrawable) mMaskImage.getDrawable())
                                         .getBitmap();
                                 detectMaskDimensions(bitmap);
                             }
@@ -328,10 +306,6 @@ public class PhotoFragment extends Fragment
 
         }
         getActivity().setTitle(getContext().getString(R.string.fragment_photo_title));
-        progressBar.getIndeterminateDrawable()
-                .setColorFilter(ContextCompat.getColor(getContext(), R.color.colorAccent),
-                        PorterDuff.Mode.MULTIPLY);
-
     }
 
     @Override
@@ -339,7 +313,7 @@ public class PhotoFragment extends Fragment
         super.onStart();
         ignoreTimeout = false;
         final long delay = TIMEOUT * DateUtils.SECOND_IN_MILLIS - (System.currentTimeMillis() - Long
-                .parseLong(preferences.getStartTime()));
+                .parseLong(mVisionLabsPreferences.getStartTime()));
         Observable.timer(Math.max(delay, 0), TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
                 .subscribe(value -> {
@@ -353,12 +327,12 @@ public class PhotoFragment extends Fragment
     @Override
     public void onResume() {
         super.onResume();
-        if (camera == null) {
+        if (mCamera == null) {
             startCapture();
         }
         mPhotoProcessor.setListener(this);
-        mPhotoProcessor.setNeedPortrait(preferences.getNeedPortrait());
-        mPhotoProcessor.disableOpenEyesCheck(preferences.getIgnoreEyes());
+        mPhotoProcessor.setNeedPortrait(mVisionLabsPreferences.getNeedPortrait());
+        mPhotoProcessor.disableOpenEyesCheck(mVisionLabsPreferences.getIgnoreEyes());
         hideWaitState();
     }
 
@@ -367,21 +341,21 @@ public class PhotoFragment extends Fragment
         super.onDestroy();
     }
 
-    private int getCameraID() {
-        return cameraID;
+    private int getCameraId() {
+        return mCameraId;
     }
 
     private void startCapture() {
-        camera = Camera.open(getCameraID());
+        mCamera = Camera.open(getCameraId());
         configureCamera();
-        final ViewTreeObserver viewTreeObserver = preview.getViewTreeObserver();
+        final ViewTreeObserver viewTreeObserver = mPreview.getViewTreeObserver();
         viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                preview.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                mPreview.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 setPreviewSize(true);
-                holderCallback = new HolderCallback();
-                preview.getHolder().addCallback(holderCallback);
+                mHolderCallback = new HolderCallback();
+                mPreview.getHolder().addCallback(mHolderCallback);
             }
         });
     }
@@ -389,21 +363,21 @@ public class PhotoFragment extends Fragment
     @Override
     public void onPause() {
         super.onPause();
-        if (camera != null) {
-            camera.setPreviewCallbackWithBuffer(null);
-            preview.getHolder().removeCallback(holderCallback);
-            holderCallback = null;
-            camera.stopPreview();
-            camera.release();
-            camera = null;
+        if (mCamera != null) {
+            mCamera.setPreviewCallbackWithBuffer(null);
+            mPreview.getHolder().removeCallback(mHolderCallback);
+            mHolderCallback = null;
+            mCamera.stopPreview();
+            mCamera.release();
+            mCamera = null;
         }
         mPhotoProcessor.removeListeners();
     }
 
 
     void setPreviewSize(boolean fullScreen) {
-        final int width = preview.getMeasuredWidth();
-        final int height = preview.getMeasuredHeight();
+        final int width = mPreview.getMeasuredWidth();
+        final int height = mPreview.getMeasuredHeight();
         boolean widthIsMax = width > height;
 
         RectF rectDisplay = new RectF();
@@ -430,14 +404,14 @@ public class PhotoFragment extends Fragment
         }
         matrix.mapRect(rectPreview);
 
-        final ViewGroup.LayoutParams layoutParams = preview.getLayoutParams();
+        final ViewGroup.LayoutParams layoutParams = mPreview.getLayoutParams();
         if (layoutParams.width != (int) rectPreview.right
                 || layoutParams.height != (int) rectPreview.bottom) {
             layoutParams.height = (int) (rectPreview.bottom);
             layoutParams.width = (int) (rectPreview.right);
-            preview.setLayoutParams(layoutParams);
+            mPreview.setLayoutParams(layoutParams);
         } else {
-            startCameraPreview(preview.getHolder());
+            startCameraPreview(mPreview.getHolder());
         }
 
     }
@@ -475,7 +449,7 @@ public class PhotoFragment extends Fragment
             result += 360;
         }
         result = result % 360;
-        camera.setDisplayOrientation(result);
+        mCamera.setDisplayOrientation(result);
         mPhotoProcessor.setImageRotation(result);
     }
 
@@ -501,28 +475,28 @@ public class PhotoFragment extends Fragment
         }
 
         if (state == 0) {//LSDKError::Ok
-            zoom_state.setVisibility(View.VISIBLE);
+            mLivenessActionText.setVisibility(View.VISIBLE);
             Log.i("STATE", "STATE IS GOOD");
-            zoom_state.setText(R.string.zoom_success);
+            mLivenessActionText.setText(R.string.zoom_success);
         } else if (state == 3) {//LSDKError::PreconditionFailed
             Log.i("VIEW", "Precondition failed!");
 
             if (action == 7) {//LA_EYE
-                zoom_state.setVisibility(View.VISIBLE);
-                zoom_state.setText(R.string.look_straight_at_the_camer);
+                mLivenessActionText.setVisibility(View.VISIBLE);
+                mLivenessActionText.setText(R.string.look_straight_at_the_camer);
                 ShowMsg = true;
             }
             if (action == 8) {//LA_ZOOM
-                zoom_state.setVisibility(View.VISIBLE);
-                zoom_state.setText(R.string.zoom_out_and_look_straight_at_the_camera);
+                mLivenessActionText.setVisibility(View.VISIBLE);
+                mLivenessActionText.setText(R.string.zoom_out_and_look_straight_at_the_camera);
                 MASKBIG = false;
                 MASKMEDIUM = false;
                 MASKSMALL = true;
                 Picasso.with(getContext()).load(R.drawable.mask_small).centerCrop().fit()
-                        .into(mask, new Callback() {
+                        .into(mMaskImage, new Callback() {
                             @Override
                             public void onSuccess() {
-                                final Bitmap bitmap = ((BitmapDrawable) mask.getDrawable())
+                                final Bitmap bitmap = ((BitmapDrawable) mMaskImage.getDrawable())
                                         .getBitmap();
                                 detectMaskDimensions(bitmap);
                             }
@@ -539,19 +513,20 @@ public class PhotoFragment extends Fragment
                 livenessStart = System.currentTimeMillis();
                 FaceLost = false;
             }
-            zoom_state.setVisibility(View.VISIBLE);
+            mLivenessActionText.setVisibility(View.VISIBLE);
             if (action == 7) {
-                zoom_state.setText(getString(R.string.close_eyes));
+                mLivenessActionText.setText(getString(R.string.close_eyes));
             } else if (action == 8) {
                 MASKBIG = true;
                 MASKMEDIUM = false;
                 MASKSMALL = false;
-                zoom_state.setText(getString(R.string.zoom_in_and_look_straight_at_the_camera));
+                mLivenessActionText
+                        .setText(getString(R.string.zoom_in_and_look_straight_at_the_camera));
                 Picasso.with(getContext()).load(R.drawable.mask_big).centerCrop().fit()
-                        .into(mask, new Callback() {
+                        .into(mMaskImage, new Callback() {
                             @Override
                             public void onSuccess() {
-                                final Bitmap bitmap = ((BitmapDrawable) mask.getDrawable())
+                                final Bitmap bitmap = ((BitmapDrawable) mMaskImage.getDrawable())
                                         .getBitmap();
                                 detectMaskDimensions(bitmap);
                             }
@@ -561,7 +536,7 @@ public class PhotoFragment extends Fragment
                             }
                         });
             } else {
-                zoom_state.setText("");
+                mLivenessActionText.setText("");
             }
         }
 
@@ -572,9 +547,9 @@ public class PhotoFragment extends Fragment
 
     @Override
     public boolean isFaceInsideBorder(Rect rect) {
-        if (preferences.getZoomAuth() && mCheckLiveness) {
-            final int width = preview.getMeasuredWidth();
-            final int height = preview.getMeasuredHeight();
+        if (mVisionLabsPreferences.getZoomAuth() && mCheckLiveness) {
+            final int width = mPreview.getMeasuredWidth();
+            final int height = mPreview.getMeasuredHeight();
 
             float widthCorrection = ((float) width) / mPhotoProcessor.getPreviewHeight();
             float heightCorrection = ((float) height) / mPhotoProcessor.getPreviewWidth();
@@ -592,12 +567,12 @@ public class PhotoFragment extends Fragment
     @Override
     public void onFaceArea(boolean detected, Rect rect, Boolean fastMove, Boolean isFrontalPose,
             boolean[] qualityStates) {
-        boolean showDetectionPreference = preferences.getShowDetection();
+        boolean showDetectionPreference = mVisionLabsPreferences.getShowDetection();
         boolean showDetectionRect = showDetectionPreference;
 
         if (detected) {
-            final int width = preview.getMeasuredWidth();
-            final int height = preview.getMeasuredHeight();
+            final int width = mPreview.getMeasuredWidth();
+            final int height = mPreview.getMeasuredHeight();
 
             float widthCorrection = ((float) width) / mPhotoProcessor.getPreviewHeight();
             float heightCorrection = ((float) height) / mPhotoProcessor.getPreviewWidth();
@@ -609,13 +584,13 @@ public class PhotoFragment extends Fragment
             int bottom = (int) (rect.bottom * heightCorrection);
 
             if (showDetectionRect) {
-                if (preferences.getZoomAuth() && mCheckLiveness) {
+                if (mVisionLabsPreferences.getZoomAuth() && mCheckLiveness) {
                     showDetectionRect = false;
                     showDetectionPreference = false;
                     //do not draw rectangle
                 } else {
                     Log.i("RECT", "Settings facerect!");
-                    faceBoundView.setFaceRect(left, top, right, bottom);
+                    mFaceBoundSurfaceView.setFaceRect(left, top, right, bottom);
                 }
             }
 
@@ -629,60 +604,55 @@ public class PhotoFragment extends Fragment
 
             if (faceInGoodState) {
                 if (!isFrontalPose) {
-                    warning.setVisibility(View.VISIBLE);
-                    warning.setText(R.string.look_straight_at_the_camer);
+                    mWarning.setVisibility(View.VISIBLE);
+                    mWarning.setText(R.string.look_straight_at_the_camer);
                     faceInGoodState = false;
                 } else if (fastMove) {
-                    warning.setVisibility(View.VISIBLE);
-                    warning.setText(R.string.moving_too_fast);
+                    mWarning.setVisibility(View.VISIBLE);
+                    mWarning.setText(R.string.moving_too_fast);
                     faceInGoodState = false;
                 } else {
-                    warning.setVisibility(View.INVISIBLE);
+                    mWarning.setVisibility(View.INVISIBLE);
                     final int[] qualityStatesStringsResId = new int[]{R.string.overdark,
                             R.string.overlight, R.string.overgray, R.string.overblur};
                 }
 
             } else {
-                warning.setVisibility(showDetectionPreference ? View.INVISIBLE : View.VISIBLE);
+                mWarning.setVisibility(showDetectionPreference ? View.INVISIBLE : View.VISIBLE);
                 Log.i("OVAL", "PUT YOUR HEAD INTO OVAL INNER");
-                warning.setText(R.string.put_your_head_into_oval);
+                mWarning.setText(R.string.put_your_head_into_oval);
             }
 
         } else {
             Log.i("OVAL", "PUT YOUR HEAD INTO OVAL OUT");
-            warning.setVisibility(showDetectionPreference ? View.INVISIBLE : View.VISIBLE);
-            warning.setText(R.string.put_your_head_into_oval);
+            mWarning.setVisibility(showDetectionPreference ? View.INVISIBLE : View.VISIBLE);
+            mWarning.setText(R.string.put_your_head_into_oval);
             showDetectionRect = false;
         }
         Log.i("RECT", "SHODETECTIONRECT " + showDetectionRect);
-        faceBoundView.setVisibility(showDetectionRect ? View.VISIBLE : View.INVISIBLE);
+        mFaceBoundSurfaceView.setVisibility(showDetectionRect ? View.VISIBLE : View.INVISIBLE);
 
         if (showDetectionRect) {
-            faceBoundView.setFaceRectColor(faceInGoodState ? Color.GREEN : Color.RED);
-            faceBoundView.invalidate();
+            mFaceBoundSurfaceView.setFaceRectColor(faceInGoodState ? Color.GREEN : Color.RED);
+            mFaceBoundSurfaceView.invalidate();
         }
     }
 
 
     @Override
     public void onBestFrameReady() {
-        //faceInGoodState &&
         if (faceInGoodState && mListener != null) {
             ignoreTimeout = true;
-            Log.i("liv", "checkLiveness is " + mCheckLiveness);
-            //check if we are in auth stage
+            // Check if we are in auth mode
             if (mCheckLiveness) {
-                if (preferences.getEyesAuth()) {
-
+                if (mVisionLabsPreferences.getEyesAuth()) {
                     mPhotoProcessor.setEyeLiveness();
                     mPhotoProcessor.startCheckLiveness();
-                } else if (preferences.getZoomAuth()) {
+                } else if (mVisionLabsPreferences.getZoomAuth()) {
                     mPhotoProcessor.setZoomLiveness();
                     mPhotoProcessor.startCheckLivenessZoom();
                 }
-
                 livenessStart = System.currentTimeMillis();
-
             } else {
                 submitBestShot();
             }
@@ -702,32 +672,30 @@ public class PhotoFragment extends Fragment
     }
 
     private void submitBestShot() {
+        mLivenessActionText.setText("");
         mListener.onBestFrameReady(mPhotoProcessor.getBestShot());
     }
 
     @Override
     public void onLuminanceState(PhotoProcessor.LuminanceState state) {
-        // Log.i("TEST"," ENTERING LUMINANCE");
         if (!cameraFlashIsSupported) {
             return;
         }
 
-        // TODO:
-
         final String flashModeNew = state.darknessState == 0 ? Camera.Parameters.FLASH_MODE_TORCH
                 : Camera.Parameters.FLASH_MODE_OFF;
-        Camera.Parameters parameters = camera.getParameters();
+        Camera.Parameters parameters = mCamera.getParameters();
 
         if (!flashModeNew.equals(parameters.getFlashMode())) {
             parameters.setFlashMode(flashModeNew);
-            camera.setParameters(parameters);
+            mCamera.setParameters(parameters);
 
             mPhotoProcessor.setFlashTorchState(state.darknessState == 0 ? true : false);
         }
     }
 
     private Camera.Size getBestPreviewSize() {
-        final List<Camera.Size> supportedPreviewSizes = camera.getParameters()
+        final List<Camera.Size> supportedPreviewSizes = mCamera.getParameters()
                 .getSupportedPreviewSizes();
         final List<Camera.Size> filteredSizes = new ArrayList<>();
         for (Camera.Size previewSize : supportedPreviewSizes) {
@@ -749,7 +717,7 @@ public class PhotoFragment extends Fragment
 
     private void configureCamera() {
         //Log.i("TEST"," ENTERING ON START_CAPTURE");
-        final Camera.Parameters parameters = camera.getParameters();
+        final Camera.Parameters parameters = mCamera.getParameters();
         try {
             parameters.setPreviewFormat(ImageFormat.NV21);
 
@@ -770,7 +738,7 @@ public class PhotoFragment extends Fragment
             final Camera.Size bestPreviewSize = getBestPreviewSize();
             mPhotoProcessor.setPreviewSize(bestPreviewSize.width, bestPreviewSize.height);
             parameters.setPreviewSize(bestPreviewSize.width, bestPreviewSize.height);
-            camera.setParameters(parameters);
+            mCamera.setParameters(parameters);
         } catch (RuntimeException exception) {
             Toast.makeText(getContext(), R.string.camera_configuration_failed, Toast.LENGTH_SHORT)
                     .show();
@@ -785,15 +753,15 @@ public class PhotoFragment extends Fragment
 
     private void startCameraPreview(SurfaceHolder holder) {
         // Log.i("TEST"," ENTERING ON START_CAMERA_PREVIEW");
-        if (camera != null) {
-            camera.stopPreview();
-            setCameraDisplayOrientation(getCameraID());
-            camera.addCallbackBuffer(mPhotoProcessor.getCallbackBuffer());
-            camera.setPreviewCallbackWithBuffer(PhotoFragment.this);
+        if (mCamera != null) {
+            mCamera.stopPreview();
+            setCameraDisplayOrientation(getCameraId());
+            mCamera.addCallbackBuffer(mPhotoProcessor.getCallbackBuffer());
+            mCamera.setPreviewCallbackWithBuffer(PhotoFragment.this);
 
             try {
-                camera.setPreviewDisplay(holder);
-                camera.startPreview();
+                mCamera.setPreviewDisplay(holder);
+                mCamera.startPreview();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -802,7 +770,7 @@ public class PhotoFragment extends Fragment
     }
 
     private int getToggledCameraFacing() {
-        return cameraFacing == Camera.CameraInfo.CAMERA_FACING_FRONT
+        return mCameraFacing == Camera.CameraInfo.CAMERA_FACING_FRONT
                 ? Camera.CameraInfo.CAMERA_FACING_BACK : Camera.CameraInfo.CAMERA_FACING_FRONT;
     }
 
@@ -818,7 +786,7 @@ public class PhotoFragment extends Fragment
     }
 
     private void restartCameraPreview(SurfaceHolder holder) {
-        if (camera != null) {
+        if (mCamera != null) {
 
             // check if it is allowed to flip cam (is there cam with another facing)
 
@@ -844,23 +812,23 @@ public class PhotoFragment extends Fragment
                 return;
             }
 
-            camera.stopPreview();
-            camera.release();
+            mCamera.stopPreview();
+            mCamera.release();
 
-            cameraID = newCameraID;
-            cameraFacing = getToggledCameraFacing();
+            mCameraId = newCameraID;
+            mCameraFacing = getToggledCameraFacing();
 
-            camera = Camera.open(getCameraID());
+            mCamera = Camera.open(getCameraId());
 
             configureCamera();
 
-            setCameraDisplayOrientation(getCameraID());
-            camera.addCallbackBuffer(mPhotoProcessor.getCallbackBuffer());
-            camera.setPreviewCallbackWithBuffer(PhotoFragment.this);
+            setCameraDisplayOrientation(getCameraId());
+            mCamera.addCallbackBuffer(mPhotoProcessor.getCallbackBuffer());
+            mCamera.setPreviewCallbackWithBuffer(PhotoFragment.this);
 
             try {
-                camera.setPreviewDisplay(holder);
-                camera.startPreview();
+                mCamera.setPreviewDisplay(holder);
+                mCamera.startPreview();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -871,9 +839,9 @@ public class PhotoFragment extends Fragment
 
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
-            if (camera != null) {
+            if (mCamera != null) {
                 try {
-                    camera.setPreviewDisplay(holder);
+                    mCamera.setPreviewDisplay(holder);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -892,6 +860,6 @@ public class PhotoFragment extends Fragment
     }
 
     private void flipCam() {
-        restartCameraPreview(preview.getHolder());
+        restartCameraPreview(mPreview.getHolder());
     }
 }
