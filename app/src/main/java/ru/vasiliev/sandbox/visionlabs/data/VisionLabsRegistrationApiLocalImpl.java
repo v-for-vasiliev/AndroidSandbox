@@ -47,14 +47,14 @@ public class VisionLabsRegistrationApiLocalImpl implements VisionLabsRegistratio
 
     private void onFail(Throwable throwable) {
         if (mListener != null) {
-            mListener.onRegistrationFail(throwable);
+            mListener.onRegistrationFailed(throwable);
         }
     }
 
     private void onSuccess(String descriptor) {
         mPreferences.setAuthDescriptor(descriptor);
         if (mListener != null) {
-            mListener.onRegistrationSuccess();
+            mListener.onRegistrationSucceeded();
         }
     }
 }

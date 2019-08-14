@@ -4,6 +4,7 @@ import com.arellomobile.mvp.MvpView;
 import com.arellomobile.mvp.viewstate.strategy.AddToEndSingleStrategy;
 import com.arellomobile.mvp.viewstate.strategy.StateStrategyType;
 
+import ru.vasiliev.sandbox.visionlabs.domain.model.AuthFailReason;
 import ru.vasiliev.sandbox.visionlabs.presentation.registration.FaceNotFoundFragment;
 
 @StateStrategyType(AddToEndSingleStrategy.class)
@@ -19,6 +20,10 @@ interface VisionLabsView extends MvpView {
 
     void showRegistration();
 
+    void onRegistrationSucceeded();
+
+    void onRegistrationFailed(Throwable throwable);
+
     void showAuth();
 
     void showPreview();
@@ -26,4 +31,10 @@ interface VisionLabsView extends MvpView {
     void showFaceNotFound(FaceNotFoundFragment.Reason reason);
 
     void showFaceNotFoundWarn();
+
+    void onFaceFailedAttempt();
+
+    void onFaceAuthFailed(AuthFailReason reason, int verificationTimeMs);
+
+    void onFaceAuthSucceeded();
 }

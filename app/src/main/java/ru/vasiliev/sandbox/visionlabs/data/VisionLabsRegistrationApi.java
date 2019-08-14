@@ -8,8 +8,8 @@ public interface VisionLabsRegistrationApi {
 
     interface Listener {
 
-        void onRegistrationSuccess();
+        void onRegistrationSucceeded();
 
-        void onRegistrationFail(Throwable throwable);
+        void onRegistrationFailed(Throwable throwable);
     }
 }

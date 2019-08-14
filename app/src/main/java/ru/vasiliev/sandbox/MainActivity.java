@@ -7,8 +7,12 @@ import android.view.View;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import proxypref.ProxyPreferences;
 import ru.vasiliev.sandbox.location.presentation.LocationActivity;
+import ru.vasiliev.sandbox.visionlabs.data.VisionLabsPreferences;
 import ru.vasiliev.sandbox.visionlabs.presentation.VisionLabsActivity;
+
+import static ru.vasiliev.sandbox.visionlabs.domain.VisionLabsConfig.PREFERENCES_FILE_NAME;
 
 /**
  * Date: 29.06.2019
@@ -17,7 +21,7 @@ import ru.vasiliev.sandbox.visionlabs.presentation.VisionLabsActivity;
  */
 public class MainActivity extends AppCompatActivity {
 
-    @OnClick({R.id.location, R.id.vision_labs})
+    @OnClick({R.id.location, R.id.vision_labs, R.id.vision_labs_reset_auth})
     void onClick(View view) {
         switch (view.getId()) {
             case R.id.location:
@@ -25,6 +29,10 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.vision_labs:
                 VisionLabsActivity.start(this);
+                break;
+            case R.id.vision_labs_reset_auth:
+                ProxyPreferences.build(VisionLabsPreferences.class,
+                        getSharedPreferences(PREFERENCES_FILE_NAME, 0)).setAuthDescriptor("");
                 break;
             default:
                 break;

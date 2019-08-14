@@ -36,7 +36,8 @@
     <string name="register_hint_pin">PIN</string>
     <string name="register_hint_confirm_pin">Повторите PIN</string>
     <string name="registration_wrong_confirm_password">PIN не подтвержден</string>
-    <string name="settings_short_password" formatted="false">PIN должен содержать от %d до %d цифр</string>
+    <string name="settings_short_password" formatted="false">PIN должен содержать от %d до %d цифр
+    </string>
     <string name="register_username_exist">Имя пользователя %s уже существует!</string>
     <string name="register_username_short">Минимальное количество символов %d</string>
     <string name="register_username_long">Максимальное количество символов %d</string>
@@ -72,11 +73,17 @@
     <string name="save">Сохранить</string>
     <string name="access_denied">Извините, доступ запрещен</string>
     <string name="no_fingers">Отпечатки пальцев отсутствуют</string>
-    <string name="permission_need_for_auth">Необходим доступ к камере и местоположению для аутентификации</string>
-    <string name="permission_need_for_register">Необходим доступ к камере и местоположению для регистрации нового пользователя</string>
+    <string name="permission_need_for_auth">Необходим доступ к камере и местоположению для
+        аутентификации
+    </string>
+    <string name="permission_need_for_register">Необходим доступ к камере и местоположению для
+        регистрации нового пользователя
+    </string>
     <string name="camera_configuration_failed">Проблема настройки камеры</string>
     <string name="photo_saved_to_gallery">Фотография сохранена в галерее</string>
-    <string name="permission_need_for_write_external">Необходимо разрешение записи для сохранения фотографии на телефон</string>
+    <string name="permission_need_for_write_external">Необходимо разрешение записи для сохранения
+        фотографии на телефон
+    </string>
     <string name="cancel">Отмена</string>
     <string name="saveFingers">Сохранить отпечатки пальца</string>
     <string name="fingerprint_not_found">Не найден отпечаток</string>
@@ -84,18 +91,22 @@
     <string name="service_unavailable">Сервис недоступен</string>
     <string name="bad_internet_conneciton">Соединение с интернетом не было установлено</string>
     <string name="bad_server_address">Адрес сервера не найден</string>
-    <string name ="bad_acc_data">Данные аккаунта сервера неверны</string>
-    <string name ="TimeOut">Долгое ожидание ответа от сервера</string>
+    <string name="bad_acc_data">Данные аккаунта сервера неверны</string>
+    <string name="TimeOut">Долгое ожидание ответа от сервера</string>
     <string name="settings">Настройки</string>
-    <string name="fingerprint_request_is_denied">Запрос отпечатка пальца отклонен. Идентификация по отпечатку заблокирована в течение 30 секунд по причине 5 неудачных проверок пароля.</string>
+    <string name="fingerprint_request_is_denied">Запрос отпечатка пальца отклонен. Идентификация по
+        отпечатку заблокирована в течение 30 секунд по причине 5 неудачных проверок пароля.
+    </string>
     <string name="auth_success_screen_vl_face_engine_mobile"></string>
     <string name="google_play_services_error">"Ошибка Google Play Services: "</string>
     <string name="user_not_found">"Такого пользователя не существует"</string>
     <string name="Ok">"Ок"</string>
+    <string name="reset_auth">Сбросить регистрацию</string>
     <string name="settings_luna2">Luna1</string>
     <string name="look_straight_at_the_camera">Смотрите прямо на камеру</string>
     <string name="zoom_out_and_look_straight_at_the_camera">Удалите камеру и смотрите прямо</string>
-    <string name="zoom_in_and_look_straight_at_the_camera">Приблизьте камеру и смотрите прямо</string>
+    <string name="zoom_in_and_look_straight_at_the_camera">Приблизьте камеру и смотрите прямо
+    </string>
     <string name="zoom_success">Успех!</string>
     <string name="Login">Логин</string>
     <string name="Password">Пароль</string>

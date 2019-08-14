@@ -16,8 +16,6 @@ import ru.visionlab.faceengine.PhotoProcessor;
 @Subcomponent(modules = {VisionLabsModule.class})
 public interface VisionLabsComponent {
 
-    PhotoProcessor getPhotoProcessor();
-
     void inject(VisionLabsPresenter presenter);
 
     void inject(PhotoFragment fragment);

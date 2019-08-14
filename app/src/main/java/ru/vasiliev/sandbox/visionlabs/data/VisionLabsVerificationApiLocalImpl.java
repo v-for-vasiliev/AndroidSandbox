@@ -9,23 +9,24 @@ import ru.vasiliev.sandbox.visionlabs.domain.model.SearchResult;
 import ru.vasiliev.sandbox.visionlabs.domain.model.SearchResultPerson;
 import ru.visionlab.faceengine.PhotoProcessor;
 
-public class VisionLabsVerifyApiLocalImpl implements VisionLabsVerifyApi {
+public class VisionLabsVerificationApiLocalImpl implements VisionLabsVerificationApi {
 
-    private VisionLabsVerifyApi.Listener mListener;
+    private VisionLabsVerificationApi.Listener mListener;
 
     private PhotoProcessor mPhotoProcessor;
 
     private VisionLabsPreferences mPreferences;
 
-    public VisionLabsVerifyApiLocalImpl(PhotoProcessor photoProcessor,
+    public VisionLabsVerificationApiLocalImpl(PhotoProcessor photoProcessor,
             VisionLabsPreferences preferences) {
         mPhotoProcessor = photoProcessor;
         mPreferences = preferences;
     }
 
     @Override
-    public void setListener(VisionLabsVerifyApi.Listener listener) {
+    public VisionLabsVerificationApi setListener(VisionLabsVerificationApi.Listener listener) {
         this.mListener = listener;
+        return this;
     }
 
     @Override

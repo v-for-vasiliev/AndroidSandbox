@@ -133,8 +133,7 @@ public class PhotoFragment extends Fragment
     boolean faceInGoodState;
 
     boolean ShowMsg = true;
-
-
+    
     private Listener mListener;
 
     private boolean ignoreTimeout;

@@ -10,40 +10,28 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.widget.Toast;
 
-import java.util.List;
-
 import butterknife.ButterKnife;
 import ru.vasiliev.sandbox.R;
-import ru.vasiliev.sandbox.visionlabs.data.VisionLabsRegistrationApi;
-import ru.vasiliev.sandbox.visionlabs.data.VisionLabsRegistrationApiLocalImpl;
-import ru.vasiliev.sandbox.visionlabs.data.VisionLabsVerifyApi;
-import ru.vasiliev.sandbox.visionlabs.domain.VisionLabsConfig;
 import ru.vasiliev.sandbox.visionlabs.domain.model.AuthFailReason;
-import ru.vasiliev.sandbox.visionlabs.domain.model.SearchResult;
-import ru.vasiliev.sandbox.visionlabs.domain.model.SearchResultPerson;
 import ru.vasiliev.sandbox.visionlabs.presentation.auth.FaceNotRecognizedFragment;
 import ru.vasiliev.sandbox.visionlabs.presentation.common.PhotoFragment;
 import ru.vasiliev.sandbox.visionlabs.presentation.registration.FaceNotFoundFragment;
 import ru.vasiliev.sandbox.visionlabs.presentation.registration.SavePhotoFragment;
 
-public class VisionLabsActivity extends MvpAppCompatActivity
-        implements VisionLabsView, PhotoFragment.Listener, SavePhotoFragment.Listener,
-        FaceNotFoundFragment.Listener, VisionLabsVerifyApi.Listener,
-        VisionLabsRegistrationApi.Listener, FaceNotRecognizedFragment.Listener {
+public class VisionLabsActivity extends MvpAppCompatActivity implements VisionLabsView {
 
     private ProgressDialog mProgress;
 
-    private int mFaceAuthFailsCount;
-
     @InjectPresenter
     VisionLabsPresenter mPresenter;
+
+    private PhotoFragment mPhotoFragment;
 
     @ProvidePresenter
     VisionLabsPresenter providePresenter() {
@@ -132,32 +120,40 @@ public class VisionLabsActivity extends MvpAppCompatActivity
     @Override
     public void showRegistration() {
         hideLoader();
-        PhotoFragment fragment = PhotoFragment.newInstance();
-        fragment.setPhotoProcessor(mPresenter.getPhotoProcessor());
-        fragment.setListener(this);
-        fragment.enableLivenessCheck(false);
+        if (mPhotoFragment == null) {
+            mPhotoFragment = PhotoFragment.newInstance();
+        } else {
+            mPhotoFragment.hideWaitState();
+        }
+        mPhotoFragment.setPhotoProcessor(mPresenter.getPhotoProcessor());
+        mPhotoFragment.setListener(mPresenter);
+        mPhotoFragment.enableLivenessCheck(false);
         mPresenter.getPreferences().setStartTime(String.valueOf(System.currentTimeMillis()));
         mPresenter.getPreferences().setNeedPortrait(false);
-        showFragment(fragment, PhotoFragment.TAG);
+        showFragment(mPhotoFragment, PhotoFragment.TAG);
     }
 
     @Override
     public void showAuth() {
         hideLoader();
-        PhotoFragment fragment = PhotoFragment.newInstance();
-        fragment.setListener(this);
-        fragment.setPhotoProcessor(mPresenter.getPhotoProcessor());
-        fragment.enableLivenessCheck(mPresenter.getPreferences().getLivenessAuth());
+        if (mPhotoFragment == null) {
+            mPhotoFragment = PhotoFragment.newInstance();
+        } else {
+            mPhotoFragment.hideWaitState();
+        }
+        mPhotoFragment.setListener(mPresenter);
+        mPhotoFragment.setPhotoProcessor(mPresenter.getPhotoProcessor());
+        mPhotoFragment.enableLivenessCheck(mPresenter.getPreferences().getLivenessAuth());
         mPresenter.getPreferences().setStartTime(String.valueOf(System.currentTimeMillis()));
         mPresenter.getPreferences().setNeedPortrait(true);
-        showFragment(fragment, PhotoFragment.TAG);
+        showFragment(mPhotoFragment, PhotoFragment.TAG);
     }
 
     @Override
     public void showPreview() {
         SavePhotoFragment fragment = SavePhotoFragment.newInstance();
         fragment.setPhotoPreview(mPresenter.getFrame());
-        fragment.setListener(this);
+        fragment.setListener(mPresenter);
         showFragment(fragment, SavePhotoFragment.TAG);
     }
 
@@ -165,7 +161,7 @@ public class VisionLabsActivity extends MvpAppCompatActivity
     public void showFaceNotFound(FaceNotFoundFragment.Reason reason) {
         FaceNotFoundFragment fragment = FaceNotFoundFragment.newInstance();
         fragment.setReason(reason);
-        fragment.setListener(this);
+        fragment.setListener(mPresenter);
         showFragment(fragment, FaceNotFoundFragment.TAG);
     }
 
@@ -175,53 +171,7 @@ public class VisionLabsActivity extends MvpAppCompatActivity
     }
 
     @Override
-    public void onBestFrameReady(Bitmap frame) {
-        mPresenter.onBestFrameReady(frame);
-    }
-
-    @Override
-    public void onTimeout(FaceNotFoundFragment.Reason reason) {
-        mPresenter.onTimeout(reason);
-
-    }
-
-    @Override
-    public void onTimeout() {
-
-    }
-
-    @Override
-    public void onLivenessWaitingOpenedEyes() {
-
-    }
-
-    @Override
-    public void onLivenessResult(int state, int action) {
-
-    }
-
-    @Override
-    public void onRetryWhenFaceNotRecognized() {
-        mPresenter.onRetry();
-    }
-
-    @Override
-    public void onRetryWhenFaceNotFound() {
-        mPresenter.onRetry();
-    }
-
-    @Override
-    public void onRetryWhenPhotoAccepted() {
-        mPresenter.onRetry();
-    }
-
-    @Override
-    public void onRegisterUser() {
-        mPresenter.registerUser(this);
-    }
-
-    @Override
-    public void onRegistrationSuccess() {
+    public void onRegistrationSucceeded() {
         new AlertDialog.Builder(this).setTitle("Vision Labs")
                 .setMessage("Регистрация прошла успешно")
                 .setPositiveButton("OK", (dialog, which) -> {
@@ -231,7 +181,7 @@ public class VisionLabsActivity extends MvpAppCompatActivity
     }
 
     @Override
-    public void onRegistrationFail(Throwable throwable) {
+    public void onRegistrationFailed(Throwable throwable) {
         new AlertDialog.Builder(this).setTitle("Vision Labs")
                 .setMessage("Не удалось выполнить регистрацию")
                 .setPositiveButton("OK", (dialog, which) -> {
@@ -241,48 +191,8 @@ public class VisionLabsActivity extends MvpAppCompatActivity
     }
 
     @Override
-    public void onVerificationSuccess(SearchResult searchResult) {
-        mPresenter.setVerificationEndTime(System.nanoTime());
-        final List<SearchResultPerson> persons = searchResult.getPersons();
-        if (persons != null && !persons.isEmpty()) {
-            final SearchResultPerson person = persons.get(0);
-            if (person.similarity > VisionLabsConfig.MIN_SIMILARITY) {
-                onFaceAuthSuccess();
-            } else {
-                onFaceAuthFail(AuthFailReason.SIMILARITY);
-            }
-        } else {
-            onFaceAuthFail(AuthFailReason.SIMILARITY);
-        }
-    }
-
-    @Override
-    public void onVerificationFail(Throwable throwable) {
-        if (throwable instanceof VisionLabsRegistrationApiLocalImpl.DescriptorNotExtractedException) {
-            onFaceAuthFail(AuthFailReason.DESCRIPTOR_EXTRACTION_ERROR);
-        } else {
-            onFaceAuthFail(AuthFailReason.OTHER);
-            throwable.printStackTrace();
-        }
-    }
-
-    private void onFaceAuthFail(AuthFailReason reason) {
-        if (mFaceAuthFailsCount < 4) {
-            final FaceNotRecognizedFragment fragment = FaceNotRecognizedFragment.newInstance();
-            fragment.setListener(this);
-            if (reason == AuthFailReason.SIMILARITY) {
-                fragment.setVerificationTime(
-                        (int) ((double) (mPresenter.getVerificationEndTime() - mPresenter
-                                .getVerificationStartTime()) / 1e6));
-            }
-            fragment.setFailReason(reason);
-            showFragment(fragment, FaceNotRecognizedFragment.TAG);
-        } else {
-            Toast.makeText(this, R.string.access_denied, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void onFaceAuthSuccess() {
+    public void onFaceAuthSucceeded() {
+        mPhotoFragment.showWaitState();
         new AlertDialog.Builder(this).setTitle("Vision Labs")
                 .setMessage("Авторизация прошла успешно")
                 .setPositiveButton("OK", (dialog, which) -> {
@@ -291,10 +201,27 @@ public class VisionLabsActivity extends MvpAppCompatActivity
                 }).setCancelable(false).create().show();
     }
 
+    @Override
+    public void onFaceFailedAttempt() {
+        Toast.makeText(this, R.string.access_denied, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onFaceAuthFailed(AuthFailReason reason, int verificationTimeMs) {
+        FaceNotRecognizedFragment fragment = FaceNotRecognizedFragment.newInstance();
+        fragment.setListener(mPresenter);
+        if (verificationTimeMs > 0) {
+            fragment.setVerificationTime(verificationTimeMs);
+        }
+        fragment.setFailReason(reason);
+        showFragment(fragment, FaceNotRecognizedFragment.TAG);
+    }
+
     private synchronized void showFragment(Fragment fragment, String tag) {
         if (!popupFragment(tag)) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, fragment, fragment.toString()).commit();
+                    .replace(R.id.container, fragment, fragment.toString()).addToBackStack(tag)
+                    .commit();
         }
     }
 
