@@ -28,11 +28,13 @@ interface VisionLabsView extends MvpView {
 
     void showPreview();
 
+    void onVerification();
+
     void showFaceNotFound(FaceNotFoundFragment.Reason reason);
 
-    void showFaceNotFoundWarn();
+    void onAuthFailedAttempt();
 
-    void onFaceFailedAttempt();
+    void onAuthMaxFailedAttemptsCountReached();
 
     void onFaceAuthFailed(AuthFailReason reason, int verificationTimeMs);
 

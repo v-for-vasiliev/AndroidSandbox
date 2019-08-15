@@ -41,6 +41,8 @@ public class VisionLabsPresenter extends MvpBasePresenter<VisionLabsView>
         PhotoFragment.Listener, SavePhotoFragment.Listener, FaceNotFoundFragment.Listener,
         FaceNotRecognizedFragment.Listener {
 
+    private static final int MAX_AUTH_FAILED_ATTEMPTS = 3;
+
     enum Mode {
         AUTH, REGISTRATION
     }
@@ -68,6 +70,8 @@ public class VisionLabsPresenter extends MvpBasePresenter<VisionLabsView>
     private long mVerificationStartTime;
 
     private long mVerificationEndTime;
+
+    private boolean mVerificationInProgress;
 
     private int mFaceAuthFailsCount;
 
@@ -210,31 +214,36 @@ public class VisionLabsPresenter extends MvpBasePresenter<VisionLabsView>
 
     @Override
     public void onVerificationSuccess(SearchResult searchResult) {
-        mVerificationEndTime = System.nanoTime();
-        final List<SearchResultPerson> persons = searchResult.getPersons();
-        if (persons != null && !persons.isEmpty()) {
-            final SearchResultPerson person = persons.get(0);
-            if (person.similarity > VisionLabsConfig.MIN_SIMILARITY) {
-                if (!mFaceAuthSucceeded) {
-                    mFaceAuthSucceeded = true;
-                    getViewState().onFaceAuthSucceeded();
+        if (!isVerificationInProgress()) {
+            getViewState().onVerification();
+            mVerificationInProgress = true;
+            mVerificationEndTime = System.nanoTime();
+            final List<SearchResultPerson> persons = searchResult.getPersons();
+            if (persons != null && !persons.isEmpty()) {
+                final SearchResultPerson person = persons.get(0);
+                if (person.similarity > VisionLabsConfig.MIN_SIMILARITY) {
+                    if (!mFaceAuthSucceeded) {
+                        mFaceAuthSucceeded = true;
+                        getViewState().onFaceAuthSucceeded();
+                    }
+                } else {
+                    countFailedAuthAttempts(AuthFailReason.SIMILARITY);
                 }
             } else {
                 countFailedAuthAttempts(AuthFailReason.SIMILARITY);
             }
-        } else {
-            countFailedAuthAttempts(AuthFailReason.SIMILARITY);
         }
     }
 
     private void countFailedAuthAttempts(AuthFailReason reason) {
-        if (mFaceAuthFailsCount < 3) {
+        if (mFaceAuthFailsCount < MAX_AUTH_FAILED_ATTEMPTS) {
             mFaceAuthFailsCount++;
-            getViewState().onFaceFailedAttempt();
+            getViewState().onAuthFailedAttempt();
         } else {
             mPreferences.setAuthDescriptor("");
-            getViewState().onFaceAuthFailed(reason,
-                    (int) ((double) (mVerificationEndTime - mVerificationStartTime) / 1e6));
+            getViewState().onAuthMaxFailedAttemptsCountReached();
+            /*getViewState().onFaceAuthFailed(reason,
+                    (int) ((double) (mVerificationEndTime - mVerificationStartTime) / 1e6));*/
         }
     }
 
@@ -281,5 +290,13 @@ public class VisionLabsPresenter extends MvpBasePresenter<VisionLabsView>
 
     Bitmap getFrame() {
         return mFrame;
+    }
+
+    public synchronized boolean isVerificationInProgress() {
+        return mVerificationInProgress;
+    }
+
+    public synchronized void setVerificationInProgress(boolean verificationInProgress) {
+        mVerificationInProgress = verificationInProgress;
     }
 }

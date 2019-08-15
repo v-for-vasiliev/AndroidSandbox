@@ -14,7 +14,8 @@ import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
-import android.widget.Toast;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import butterknife.ButterKnife;
 import ru.vasiliev.sandbox.R;
@@ -25,6 +26,8 @@ import ru.vasiliev.sandbox.visionlabs.presentation.registration.FaceNotFoundFrag
 import ru.vasiliev.sandbox.visionlabs.presentation.registration.SavePhotoFragment;
 
 public class VisionLabsActivity extends MvpAppCompatActivity implements VisionLabsView {
+
+    private static final int MENU_ITEM_ID_RESET_REGISTRATION = 1;
 
     private ProgressDialog mProgress;
 
@@ -59,6 +62,25 @@ public class VisionLabsActivity extends MvpAppCompatActivity implements VisionLa
     protected void onDestroy() {
         super.onDestroy();
         mPresenter.releaseComponent();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.NONE, MENU_ITEM_ID_RESET_REGISTRATION, Menu.CATEGORY_SECONDARY,
+                "Сбросить регистрацию");
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case MENU_ITEM_ID_RESET_REGISTRATION:
+                mPresenter.getPreferences().setAuthDescriptor("");
+                showRegistration();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -135,6 +157,7 @@ public class VisionLabsActivity extends MvpAppCompatActivity implements VisionLa
         } else {
             mPhotoFragment.hideWaitState();
         }
+        mPresenter.setVerificationInProgress(false);
         mPhotoFragment.setListener(mPresenter);
         mPhotoFragment.setPhotoProcessor(mPresenter.getPhotoProcessor());
         mPhotoFragment.enableLivenessCheck(mPresenter.getPreferences().getLivenessAuth());
@@ -152,6 +175,11 @@ public class VisionLabsActivity extends MvpAppCompatActivity implements VisionLa
     }
 
     @Override
+    public void onVerification() {
+        mPhotoFragment.showWaitState();
+    }
+
+    @Override
     public void showFaceNotFound(FaceNotFoundFragment.Reason reason) {
         FaceNotFoundFragment fragment = FaceNotFoundFragment.newInstance();
         fragment.setReason(reason);
@@ -160,13 +188,8 @@ public class VisionLabsActivity extends MvpAppCompatActivity implements VisionLa
     }
 
     @Override
-    public void showFaceNotFoundWarn() {
-        Toast.makeText(this, R.string.access_denied, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
     public void onRegistrationSucceeded() {
-        new AlertDialog.Builder(this).setTitle("Vision Labs")
+        new AlertDialog.Builder(this).setTitle("Регистрация")
                 .setMessage("Регистрация прошла успешно")
                 .setPositiveButton("OK", (dialog, which) -> {
                     dialog.dismiss();
@@ -176,7 +199,7 @@ public class VisionLabsActivity extends MvpAppCompatActivity implements VisionLa
 
     @Override
     public void onRegistrationFailed(Throwable throwable) {
-        new AlertDialog.Builder(this).setTitle("Vision Labs")
+        new AlertDialog.Builder(this).setTitle("Регистрация")
                 .setMessage("Не удалось выполнить регистрацию")
                 .setPositiveButton("OK", (dialog, which) -> {
                     dialog.dismiss();
@@ -187,7 +210,7 @@ public class VisionLabsActivity extends MvpAppCompatActivity implements VisionLa
     @Override
     public void onFaceAuthSucceeded() {
         mPhotoFragment.showWaitState();
-        new AlertDialog.Builder(this).setTitle("Vision Labs")
+        new AlertDialog.Builder(this).setTitle("Авторизация")
                 .setMessage("Авторизация прошла успешно")
                 .setPositiveButton("OK", (dialog, which) -> {
                     dialog.dismiss();
@@ -196,13 +219,19 @@ public class VisionLabsActivity extends MvpAppCompatActivity implements VisionLa
     }
 
     @Override
-    public void onFaceFailedAttempt() {
-        mPhotoFragment.showWaitState();
-        new AlertDialog.Builder(this).setTitle("Vision Labs")
+    public void onAuthFailedAttempt() {
+        new AlertDialog.Builder(this).setTitle("Авторизация")
                 .setMessage("Отказано в доступе, попробуйте еще раз")
-                .setPositiveButton("OK", (dialog, which) -> {
-                    showAuth();
-                }).setCancelable(false).create().show();
+                .setPositiveButton("OK", (dialog, which) -> showAuth()).setCancelable(false)
+                .create().show();
+    }
+
+    @Override
+    public void onAuthMaxFailedAttemptsCountReached() {
+        new AlertDialog.Builder(this).setTitle("Авторизация").setMessage(
+                "Превышен лимит попыток авторизации. Необходимо повторно пройти процедуру регистрации")
+                .setPositiveButton("Зарегистрироваться", (dialog, which) -> showRegistration())
+                .setCancelable(false).create().show();
     }
 
     @Override

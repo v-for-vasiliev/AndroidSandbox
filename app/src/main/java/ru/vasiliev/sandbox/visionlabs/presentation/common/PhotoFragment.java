@@ -14,6 +14,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.format.DateUtils;
@@ -102,31 +103,31 @@ public class PhotoFragment extends Fragment
 
     Camera mCamera;
 
-    boolean MASKBIG = false;
+    boolean mMaskBig = false;
 
-    boolean MASKSMALL = false;
+    boolean mMaskSmall = false;
 
-    boolean MASKMEDIUM = false;
+    boolean mMaskMedium = false;
 
-    int maskTop;
+    int mMaskTop;
 
-    int maskBottom;
+    int mMaskBottom;
 
-    int maskLeft;
+    int mMaskLeft;
 
-    int maskRight;
+    int mMaskRight;
 
-    boolean faceInGoodState;
+    boolean mFaceInGoodState;
 
-    boolean ShowMsg = true;
+    boolean mShowMsg = true;
 
     private Listener mListener;
 
-    private boolean ignoreTimeout;
+    private boolean mIgnoreTimeout;
 
-    private boolean FaceLost = false;
+    private boolean mFaceLost = false;
 
-    Rect maskRect;
+    Rect mMaskRect;
 
     private boolean mCheckLiveness = false;
 
@@ -136,9 +137,9 @@ public class PhotoFragment extends Fragment
 
     private int mCameraFacing = -1;
 
-    private long livenessDelta = 0;
+    private long mLivenessDelta = 0;
 
-    private long livenessStart = 0;
+    private long mLivenessStart = 0;
 
     public static PhotoFragment newInstance() {
         PhotoFragment fragment = new PhotoFragment();
@@ -148,7 +149,7 @@ public class PhotoFragment extends Fragment
     }
 
     public PhotoFragment() {
-        maskRect = new android.graphics.Rect();
+        mMaskRect = new android.graphics.Rect();
     }
 
     public void setListener(Listener listener) {
@@ -170,8 +171,60 @@ public class PhotoFragment extends Fragment
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
+        return createView(inflater, container);
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        initView();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mIgnoreTimeout = false;
+        final long delay = TIMEOUT * DateUtils.SECOND_IN_MILLIS - (System.currentTimeMillis() - Long
+                .parseLong(mVisionLabsPreferences.getStartTime()));
+        Observable.timer(Math.max(delay, 0), TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
+                .subscribe(value -> {
+                    if (mListener != null && !mIgnoreTimeout) {
+                        mListener.onTimeout(FaceNotFoundFragment.Reason.NOT_FOUND);
+                        mListener.onTimeout();
+                    }
+                });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mCamera == null) {
+            startCapture();
+        }
+        mPhotoProcessor.setListener(this);
+        mPhotoProcessor.setNeedPortrait(mVisionLabsPreferences.getNeedPortrait());
+        mPhotoProcessor.disableOpenEyesCheck(mVisionLabsPreferences.getIgnoreEyes());
+        hideWaitState();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mCamera != null) {
+            mCamera.setPreviewCallbackWithBuffer(null);
+            mPreview.getHolder().removeCallback(mHolderCallback);
+            mHolderCallback = null;
+            mCamera.stopPreview();
+            mCamera.release();
+            mCamera = null;
+        }
+        mPhotoProcessor.removeListeners();
+    }
+
+    private View createView(LayoutInflater inflater, ViewGroup container) {
         boolean useFrontCamera = false;
 
         if (mVisionLabsPreferences.getUseFrontCamera()) {
@@ -198,54 +251,11 @@ public class PhotoFragment extends Fragment
         return view;
     }
 
-    public void showWaitState() {
-        mCamera.stopPreview();
-    }
-
-    public void hideWaitState() {
-        // Set mask to visible in auth stage if zoom liveness is enabled
-        if (mVisionLabsPreferences.getZoomAuth() && mCheckLiveness) {
-            mMaskImage.setVisibility(View.VISIBLE);
-        } else {
-            mMaskImage.setVisibility(
-                    mVisionLabsPreferences.getShowDetection() ? View.INVISIBLE : View.VISIBLE);
-        }
-    }
-
-    private void detectMaskDimensions(Bitmap bitmap) {
-        if (MASKSMALL) {
-            maskLeft = bitmap.getWidth() / 4;
-            maskRight = maskLeft * 3;
-            maskTop = bitmap.getHeight() / 4;
-            maskBottom = maskTop * 3;
-        } else if (MASKMEDIUM) {
-            maskLeft = bitmap.getWidth() / 7;
-            maskRight = maskLeft * 6;
-            maskTop = bitmap.getHeight() / 7;
-            maskBottom = maskTop * 6;
-        } else if (MASKBIG) {
-            maskLeft = 0;
-            maskRight = bitmap.getWidth();
-            maskTop = bitmap.getHeight() / 8;
-            maskBottom = maskTop * 8;
-        }
-
-        maskRect.left = maskLeft;
-        maskRect.right = maskRight;
-        maskRect.top = maskTop;
-        maskRect.bottom = maskBottom;
-        Log.i("RECT", "RECT FLATTEN" + maskRect.flattenToString());
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        getActivity().setTitle(R.string.fragment_photo_title);
-
+    private void initView() {
         if (!mCheckLiveness) {
-            MASKBIG = false;
-            MASKMEDIUM = true;
-            MASKSMALL = false;
+            mMaskBig = false;
+            mMaskMedium = true;
+            mMaskSmall = false;
             Picasso.with(getContext()).load(R.drawable.mask).centerCrop().fit()
                     .into(mMaskImage, new Callback() {
 
@@ -263,9 +273,9 @@ public class PhotoFragment extends Fragment
                     });
         } else {
             if (mVisionLabsPreferences.getZoomAuth()) {
-                MASKBIG = false;
-                MASKMEDIUM = false;
-                MASKSMALL = true;
+                mMaskBig = false;
+                mMaskMedium = false;
+                mMaskSmall = true;
                 mLivenessActionText.setVisibility(View.VISIBLE);
                 mLivenessActionText.setText(R.string.zoom_out_and_look_straight_at_the_camera);
                 Picasso.with(getContext()).load(R.drawable.mask_small).centerCrop().fit()
@@ -284,9 +294,9 @@ public class PhotoFragment extends Fragment
                         });
             } else if (mVisionLabsPreferences.getEyesAuth() && (!mVisionLabsPreferences
                     .getShowDetection())) {
-                MASKBIG = false;
-                MASKMEDIUM = true;
-                MASKSMALL = false;
+                mMaskBig = false;
+                mMaskMedium = true;
+                mMaskSmall = false;
                 Log.i("MASK", "Drawing medium mask");
                 Picasso.with(getContext()).load(R.drawable.mask).centerCrop().fit()
                         .into(mMaskImage, new Callback() {
@@ -303,42 +313,63 @@ public class PhotoFragment extends Fragment
                             }
                         });
             }
-
         }
         getActivity().setTitle(getContext().getString(R.string.fragment_photo_title));
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        ignoreTimeout = false;
-        final long delay = TIMEOUT * DateUtils.SECOND_IN_MILLIS - (System.currentTimeMillis() - Long
-                .parseLong(mVisionLabsPreferences.getStartTime()));
-        Observable.timer(Math.max(delay, 0), TimeUnit.MILLISECONDS)
-                .observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
-                .subscribe(value -> {
-                    if (mListener != null && !ignoreTimeout) {
-                        mListener.onTimeout(FaceNotFoundFragment.Reason.NOT_FOUND);
-                        mListener.onTimeout();
-                    }
-                });
+    public void pause() {
+
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (mCamera == null) {
-            startCapture();
+    public void resume() {
+
+    }
+
+    public void showWaitState() {
+        if (mCamera != null) {
+            mCamera.stopPreview();
+        }
+        mPhotoProcessor.removeListeners();
+    }
+
+    public void hideWaitState() {
+        // Set mask to visible in auth stage if zoom liveness is enabled
+        if (mVisionLabsPreferences.getZoomAuth() && mCheckLiveness) {
+            mMaskImage.setVisibility(View.VISIBLE);
+        } else {
+            mMaskImage.setVisibility(
+                    mVisionLabsPreferences.getShowDetection() ? View.INVISIBLE : View.VISIBLE);
+        }
+        if (mCamera != null) {
+            mCamera.startPreview();
         }
         mPhotoProcessor.setListener(this);
-        mPhotoProcessor.setNeedPortrait(mVisionLabsPreferences.getNeedPortrait());
-        mPhotoProcessor.disableOpenEyesCheck(mVisionLabsPreferences.getIgnoreEyes());
-        hideWaitState();
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
+
+    private void detectMaskDimensions(Bitmap bitmap) {
+        if (mMaskSmall) {
+            mMaskLeft = bitmap.getWidth() / 4;
+            mMaskRight = mMaskLeft * 3;
+            mMaskTop = bitmap.getHeight() / 4;
+            mMaskBottom = mMaskTop * 3;
+        } else if (mMaskMedium) {
+            mMaskLeft = bitmap.getWidth() / 7;
+            mMaskRight = mMaskLeft * 6;
+            mMaskTop = bitmap.getHeight() / 7;
+            mMaskBottom = mMaskTop * 6;
+        } else if (mMaskBig) {
+            mMaskLeft = 0;
+            mMaskRight = bitmap.getWidth();
+            mMaskTop = bitmap.getHeight() / 8;
+            mMaskBottom = mMaskTop * 8;
+        }
+
+        mMaskRect.left = mMaskLeft;
+        mMaskRect.right = mMaskRight;
+        mMaskRect.top = mMaskTop;
+        mMaskRect.bottom = mMaskBottom;
+        Log.i("RECT", "RECT FLATTEN" + mMaskRect.flattenToString());
     }
 
     private int getCameraId() {
@@ -358,20 +389,6 @@ public class PhotoFragment extends Fragment
                 mPreview.getHolder().addCallback(mHolderCallback);
             }
         });
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mCamera != null) {
-            mCamera.setPreviewCallbackWithBuffer(null);
-            mPreview.getHolder().removeCallback(mHolderCallback);
-            mHolderCallback = null;
-            mCamera.stopPreview();
-            mCamera.release();
-            mCamera = null;
-        }
-        mPhotoProcessor.removeListeners();
     }
 
 
@@ -463,13 +480,13 @@ public class PhotoFragment extends Fragment
     @Override
     public void onLivenessResult(int state, int action) {
 
-        livenessDelta = System.currentTimeMillis() - livenessStart;
-        Log.i("LTIMER", "Liveness Delta" + livenessDelta / 1000 + " sec");
+        mLivenessDelta = System.currentTimeMillis() - mLivenessStart;
+        Log.i("LTIMER", "Liveness Delta" + mLivenessDelta / 1000 + " sec");
 
-        if (state < 0 || livenessDelta / 1000 > LIVENESS_TIMEOUT) {
+        if (state < 0 || mLivenessDelta / 1000 > LIVENESS_TIMEOUT) {
             if (mListener != null) {
                 Log.i("LTIMER", "TIMEOUT!!");
-                ShowMsg = true;
+                mShowMsg = true;
                 mListener.onTimeout(FaceNotFoundFragment.Reason.LIVENESS);
             }
         }
@@ -484,14 +501,14 @@ public class PhotoFragment extends Fragment
             if (action == 7) {//LA_EYE
                 mLivenessActionText.setVisibility(View.VISIBLE);
                 mLivenessActionText.setText(R.string.look_straight_at_the_camer);
-                ShowMsg = true;
+                mShowMsg = true;
             }
             if (action == 8) {//LA_ZOOM
                 mLivenessActionText.setVisibility(View.VISIBLE);
                 mLivenessActionText.setText(R.string.zoom_out_and_look_straight_at_the_camera);
-                MASKBIG = false;
-                MASKMEDIUM = false;
-                MASKSMALL = true;
+                mMaskBig = false;
+                mMaskMedium = false;
+                mMaskSmall = true;
                 Picasso.with(getContext()).load(R.drawable.mask_small).centerCrop().fit()
                         .into(mMaskImage, new Callback() {
                             @Override
@@ -507,19 +524,19 @@ public class PhotoFragment extends Fragment
                         });
             }
             FaceEngineJNI.resetLiveness();
-            FaceLost = true;
+            mFaceLost = true;
         } else if (state == 2) {//LSDKError::NotReady
-            if (FaceLost) {
-                livenessStart = System.currentTimeMillis();
-                FaceLost = false;
+            if (mFaceLost) {
+                mLivenessStart = System.currentTimeMillis();
+                mFaceLost = false;
             }
             mLivenessActionText.setVisibility(View.VISIBLE);
             if (action == 7) {
                 mLivenessActionText.setText(getString(R.string.close_eyes));
             } else if (action == 8) {
-                MASKBIG = true;
-                MASKMEDIUM = false;
-                MASKSMALL = false;
+                mMaskBig = true;
+                mMaskMedium = false;
+                mMaskSmall = false;
                 mLivenessActionText
                         .setText(getString(R.string.zoom_in_and_look_straight_at_the_camera));
                 Picasso.with(getContext()).load(R.drawable.mask_big).centerCrop().fit()
@@ -559,7 +576,7 @@ public class PhotoFragment extends Fragment
 
             int right = (int) (rect.right * widthCorrection);
             int bottom = (int) (rect.bottom * heightCorrection);
-            return maskRect.contains(left, top, right, bottom);
+            return mMaskRect.contains(left, top, right, bottom);
         }
         return true;
     }
@@ -597,20 +614,20 @@ public class PhotoFragment extends Fragment
             Rect r = new Rect(left, top, right, bottom);
 
             Log.i("RECT", "DETECTOR RECT FLATTEN" + r.flattenToString());
-            Log.i("RECT", "MASK RECT FLATTEN" + maskRect.flattenToString());
-            faceInGoodState = maskRect.isEmpty() || maskRect.contains(left, top, right, bottom);
+            Log.i("RECT", "MASK RECT FLATTEN" + mMaskRect.flattenToString());
+            mFaceInGoodState = mMaskRect.isEmpty() || mMaskRect.contains(left, top, right, bottom);
 
-            Log.i("YASSS", "Containts? " + faceInGoodState);
+            Log.i("YASSS", "Containts? " + mFaceInGoodState);
 
-            if (faceInGoodState) {
+            if (mFaceInGoodState) {
                 if (!isFrontalPose) {
                     mWarning.setVisibility(View.VISIBLE);
                     mWarning.setText(R.string.look_straight_at_the_camer);
-                    faceInGoodState = false;
+                    mFaceInGoodState = false;
                 } else if (fastMove) {
                     mWarning.setVisibility(View.VISIBLE);
                     mWarning.setText(R.string.moving_too_fast);
-                    faceInGoodState = false;
+                    mFaceInGoodState = false;
                 } else {
                     mWarning.setVisibility(View.INVISIBLE);
                     final int[] qualityStatesStringsResId = new int[]{R.string.overdark,
@@ -633,7 +650,7 @@ public class PhotoFragment extends Fragment
         mFaceBoundSurfaceView.setVisibility(showDetectionRect ? View.VISIBLE : View.INVISIBLE);
 
         if (showDetectionRect) {
-            mFaceBoundSurfaceView.setFaceRectColor(faceInGoodState ? Color.GREEN : Color.RED);
+            mFaceBoundSurfaceView.setFaceRectColor(mFaceInGoodState ? Color.GREEN : Color.RED);
             mFaceBoundSurfaceView.invalidate();
         }
     }
@@ -641,8 +658,8 @@ public class PhotoFragment extends Fragment
 
     @Override
     public void onBestFrameReady() {
-        if (faceInGoodState && mListener != null) {
-            ignoreTimeout = true;
+        if (mFaceInGoodState && mListener != null) {
+            mIgnoreTimeout = true;
             // Check if we are in auth mode
             if (mCheckLiveness) {
                 if (mVisionLabsPreferences.getEyesAuth()) {
@@ -652,7 +669,7 @@ public class PhotoFragment extends Fragment
                     mPhotoProcessor.setZoomLiveness();
                     mPhotoProcessor.startCheckLivenessZoom();
                 }
-                livenessStart = System.currentTimeMillis();
+                mLivenessStart = System.currentTimeMillis();
             } else {
                 submitBestShot();
             }

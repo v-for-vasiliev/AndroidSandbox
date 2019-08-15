@@ -55,7 +55,7 @@
     <string name="pin_fragment_incorrect_pin">Неверный PIN</string>
     <string name="fragment_fingerprint_message">Коснитесь пальцем\n“LUNA Mobile”</string>
     <string name="error_face_not_found">Лицо не найдено</string>
-    <string name="error_liveness">Проверка liveness не пройдена</string>
+    <string name="error_liveness">Liveness проверка не пройдена</string>
     <string name="retry">Повторить</string>
     <string name="authentication_successful">аутентификация\nуспешна</string>
     <string name="verification_time" formatted="false">Время: %d мс</string>
@@ -69,7 +69,7 @@
     <string name="overdark">Слишком темно</string>
     <string name="overgray">Изображение десатурировано</string>
     <string name="overblur">Изображение не сфокусировано</string>
-    <string name="close_eyes">"Закройте, пожалуйста, глаза"</string>
+    <string name="close_eyes">Медленно моргните для авторизации</string>
     <string name="save">Сохранить</string>
     <string name="access_denied">Извините, доступ запрещен</string>
     <string name="no_fingers">Отпечатки пальцев отсутствуют</string>
@@ -111,4 +111,5 @@
     <string name="Login">Логин</string>
     <string name="Password">Пароль</string>
     <string name="Doesnt_exist">Данные аккаунта некорректны</string>
+    <string name="reset_registration">Сбросить регистрацию</string>
 </resources>
