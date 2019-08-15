@@ -9,13 +9,21 @@
         tools:context=".MainActivity"
         tools:showIn="@layout/activity_main">
 
+    <Button android:id="@+id/app_settings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Application settings"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
     <Button android:id="@+id/location"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Location"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@id/app_settings"/>
 
     <Button android:id="@+id/vision_labs"
             android:layout_width="match_parent"

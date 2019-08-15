@@ -56,12 +56,6 @@ public class VisionLabsActivity extends MvpAppCompatActivity implements VisionLa
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        mPresenter.init();
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         mPresenter.releaseComponent();
@@ -203,7 +197,12 @@ public class VisionLabsActivity extends MvpAppCompatActivity implements VisionLa
 
     @Override
     public void onFaceFailedAttempt() {
-        Toast.makeText(this, R.string.access_denied, Toast.LENGTH_SHORT).show();
+        mPhotoFragment.showWaitState();
+        new AlertDialog.Builder(this).setTitle("Vision Labs")
+                .setMessage("Отказано в доступе, попробуйте еще раз")
+                .setPositiveButton("OK", (dialog, which) -> {
+                    showAuth();
+                }).setCancelable(false).create().show();
     }
 
     @Override

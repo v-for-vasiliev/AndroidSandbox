@@ -1,6 +1,9 @@
 package ru.vasiliev.sandbox;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -21,7 +24,7 @@ import static ru.vasiliev.sandbox.visionlabs.domain.VisionLabsConfig.PREFERENCES
  */
 public class MainActivity extends AppCompatActivity {
 
-    @OnClick({R.id.location, R.id.vision_labs, R.id.vision_labs_reset_auth})
+    @OnClick({R.id.location, R.id.vision_labs, R.id.vision_labs_reset_auth, R.id.app_settings})
     void onClick(View view) {
         switch (view.getId()) {
             case R.id.location:
@@ -33,6 +36,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.vision_labs_reset_auth:
                 ProxyPreferences.build(VisionLabsPreferences.class,
                         getSharedPreferences(PREFERENCES_FILE_NAME, 0)).setAuthDescriptor("");
+                break;
+            case R.id.app_settings:
+                openAppSettings();
                 break;
             default:
                 break;
@@ -47,5 +53,13 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(ru.vasiliev.sandbox.R.id.toolbar);
         setSupportActionBar(toolbar);
         ButterKnife.bind(this);
+    }
+
+    private void openAppSettings() {
+        Intent intent = new Intent();
+        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", getPackageName(), null);
+        intent.setData(uri);
+        startActivity(intent);
     }
 }

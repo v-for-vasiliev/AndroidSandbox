@@ -17,8 +17,8 @@ public class VisionLabsModule {
 
     @VisionLabsScope
     @Provides
-    VisionLabsInteractor provideInteractor() {
-        return new VisionLabsInteractorImpl();
+    VisionLabsInteractor provideInteractor(VisionLabsPreferences preferences) {
+        return new VisionLabsInteractorImpl(preferences);
     }
 
     @VisionLabsScope
@@ -46,7 +46,7 @@ public class VisionLabsModule {
         return new VisionLabsVerificationApiLocalImpl(photoProcessor, preferences);
     }
 
-// Engine must be loaded before this inject.
+    // Engine must be loaded before this inject.
     @VisionLabsScope
     @Provides
     VisionLabsRegistrationApi provideRegistrationApi(PhotoProcessor photoProcessor,

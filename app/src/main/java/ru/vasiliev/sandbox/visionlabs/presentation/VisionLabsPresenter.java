@@ -77,6 +77,12 @@ public class VisionLabsPresenter extends MvpBasePresenter<VisionLabsView>
     }
 
     @Override
+    protected void onFirstViewAttach() {
+        super.onFirstViewAttach();
+        init();
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         mPhotoProcessor.release();
@@ -86,7 +92,7 @@ public class VisionLabsPresenter extends MvpBasePresenter<VisionLabsView>
         App.getComponentManager().releaseVisionLabsComponent();
     }
 
-    void init() {
+    private void init() {
         getViewState().requestPermissions();
     }
 
@@ -150,12 +156,7 @@ public class VisionLabsPresenter extends MvpBasePresenter<VisionLabsView>
         if (getMode() == REGISTRATION) {
             getViewState().showFaceNotFound(reason);
         } else if (getMode() == AUTH) {
-            mFaceAuthFailsCount++;
-            if (mFaceAuthFailsCount >= 3) {
-                getViewState().showFaceNotFound(reason);
-            } else {
-                getViewState().showFaceNotFoundWarn();
-            }
+            getViewState().showFaceNotFound(reason);
         }
     }
 
@@ -228,10 +229,12 @@ public class VisionLabsPresenter extends MvpBasePresenter<VisionLabsView>
 
     private void countFailedAuthAttempts(AuthFailReason reason) {
         if (mFaceAuthFailsCount < 3) {
+            mFaceAuthFailsCount++;
+            getViewState().onFaceFailedAttempt();
+        } else {
+            mPreferences.setAuthDescriptor("");
             getViewState().onFaceAuthFailed(reason,
                     (int) ((double) (mVerificationEndTime - mVerificationStartTime) / 1e6));
-        } else {
-            getViewState().onFaceFailedAttempt();
         }
     }
 
