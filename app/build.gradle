@@ -1,9 +1,8 @@
 apply plugin: 'com.android.application'
-//apply plugin: 'kotlin-android-extensions'
-//apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
         applicationId "ru.vasiliev.sandbox"
@@ -56,13 +55,80 @@ dependencies {
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
-    implementation 'com.android.support:support-v4:26.1.0'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    // Support
+    implementation supportLibs.appCompat
+    implementation supportLibs.design
+    implementation supportLibs.constaintLayout
+    implementation supportLibs.cardview
+    implementation supportLibs.recyclerview
 
-    AppDependecies.each {
-        add(it.configuration, it.dependency)
-    }
+    // Dagger2
+    implementation dagger2.dagger
+    annotationProcessor dagger2.daggerCompiler
+    implementation dagger2.daggerAndroid
+    implementation dagger2.daggerAndroidSupport
+    annotationProcessor dagger2.daggerAndroidCompiler
+
+    // RxJava2
+    implementation rxjava2.rxjava
+    implementation rxjava2.rxandroid
+    implementation rxjava2.rxbinding
+
+    // Rx bindings
+    implementation rxbindings.rxpermissions
+
+    // Retrofit
+    implementation retrofit.retrofit
+    implementation retrofit.retrofitRxJavaAdapter
+    implementation retrofit.retrofitConverterGson
+    implementation retrofit.retrofitConverterJackson
+
+    // Room
+    implementation room.room
+    annotationProcessor room.roomCompiler
+    implementation room.roomRxJava
+
+    // Playservices
+    implementation playservices.location
+
+    // ButterKnife
+    implementation butterknife.butterknife
+    annotationProcessor butterknife.butterknifeCompiler
+
+    // Timber
+    implementation timber.timber
+
+    // Glide
+    implementation glide.glide
+    annotationProcessor glide.glideCompiler
+    implementation glide.recyclerIntegration
+
+    // Picasso
+    implementation picasso.picasso
+
+    // Moxy
+    implementation moxy.moxy
+    annotationProcessor moxy.moxyCompiler
+    implementation moxy.moxyAppCompat
+
+    // JodaTime
+    implementation jodatime.jodatime
+
+    // Stetho
+    implementation stetho.stetho
+    implementation stetho.stethoOkHttp
+
+    // Gson
+    implementation gson.gson
+
+    // Proxypreferences
+    implementation proxypref.proxypref
+
+    // Rounded Image View
+    implementation roundedimageview.roundedimageview
+
+    // Tests
+    // testImplementation 'junit:junit:4.12'
+    // androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    // androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
