@@ -1,4 +1,4 @@
-package ru.vasiliev.sandbox.di.scopes;
+package ru.vasiliev.sandbox.visionlabs.di;
 
 import javax.inject.Scope;
 import java.lang.annotation.Retention;

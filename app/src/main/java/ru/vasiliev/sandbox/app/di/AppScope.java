@@ -1,4 +1,4 @@
-package ru.vasiliev.sandbox.di.scopes;
+package ru.vasiliev.sandbox.app.di;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

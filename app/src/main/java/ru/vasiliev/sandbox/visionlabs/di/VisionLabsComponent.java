@@ -1,11 +1,8 @@
-package ru.vasiliev.sandbox.di.components;
+package ru.vasiliev.sandbox.visionlabs.di;
 
 import dagger.Subcomponent;
-import ru.vasiliev.sandbox.di.modules.VisionLabsModule;
-import ru.vasiliev.sandbox.di.scopes.VisionLabsScope;
 import ru.vasiliev.sandbox.visionlabs.presentation.VisionLabsPresenter;
 import ru.vasiliev.sandbox.visionlabs.presentation.common.PhotoFragment;
-import ru.visionlab.faceengine.PhotoProcessor;
 
 /**
  * Date: 12.08.2019

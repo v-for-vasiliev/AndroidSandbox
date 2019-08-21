@@ -1,11 +1,10 @@
-package ru.vasiliev.sandbox.di.modules;
+package ru.vasiliev.sandbox.visionlabs.di;
 
 import android.content.Context;
 
 import dagger.Module;
 import dagger.Provides;
 import proxypref.ProxyPreferences;
-import ru.vasiliev.sandbox.di.scopes.VisionLabsScope;
 import ru.vasiliev.sandbox.visionlabs.data.VisionLabsPreferences;
 import ru.vasiliev.sandbox.visionlabs.domain.VisionLabsInteractor;
 import ru.vasiliev.sandbox.visionlabs.domain.VisionLabsInteractorImpl;

@@ -2,9 +2,10 @@ package ru.vasiliev.sandbox;
 
 import android.app.Application;
 
-import ru.vasiliev.sandbox.di.components.AppComponent;
-import ru.vasiliev.sandbox.di.components.DaggerAppComponent;
-import ru.vasiliev.sandbox.di.modules.AppModule;
+import ru.vasiliev.sandbox.app.ComponentManager;
+import ru.vasiliev.sandbox.app.di.AppComponent;
+import ru.vasiliev.sandbox.app.di.AppModule;
+import ru.vasiliev.sandbox.app.di.DaggerAppComponent;
 import timber.log.Timber;
 
 /**

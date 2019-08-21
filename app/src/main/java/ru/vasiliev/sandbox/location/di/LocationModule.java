@@ -1,4 +1,4 @@
-package ru.vasiliev.sandbox.di.modules;
+package ru.vasiliev.sandbox.location.di;
 
 import com.google.android.gms.location.LocationRequest;
 
@@ -10,7 +10,7 @@ import dagger.Module;
 import dagger.Provides;
 import ru.vasiliev.sandbox.App;
 import ru.vasiliev.sandbox.BuildConfig;
-import ru.vasiliev.sandbox.di.scopes.AppScope;
+import ru.vasiliev.sandbox.app.di.AppScope;
 import ru.vasiliev.sandbox.location.LocationServices;
 import ru.vasiliev.sandbox.location.RxFusedLocationProvider;
 import ru.vasiliev.sandbox.location.RxLegacyLocationProvider;

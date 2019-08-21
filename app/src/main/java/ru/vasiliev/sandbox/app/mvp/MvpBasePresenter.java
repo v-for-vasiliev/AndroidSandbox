@@ -1,4 +1,4 @@
-package ru.vasiliev.sandbox.mvp;
+package ru.vasiliev.sandbox.app.mvp;
 
 import com.arellomobile.mvp.MvpPresenter;
 import com.arellomobile.mvp.MvpView;

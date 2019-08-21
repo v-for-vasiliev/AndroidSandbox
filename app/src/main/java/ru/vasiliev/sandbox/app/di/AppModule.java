@@ -1,4 +1,4 @@
-package ru.vasiliev.sandbox.di.modules;
+package ru.vasiliev.sandbox.app.di;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import dagger.Module;
 import dagger.Provides;
 import ru.vasiliev.sandbox.App;
-import ru.vasiliev.sandbox.di.scopes.AppScope;
 
 /**
  * Date: 06.07.2019

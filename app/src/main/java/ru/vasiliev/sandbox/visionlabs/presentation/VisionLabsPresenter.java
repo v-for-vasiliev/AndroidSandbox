@@ -14,7 +14,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import ru.vasiliev.sandbox.App;
-import ru.vasiliev.sandbox.mvp.MvpBasePresenter;
+import ru.vasiliev.sandbox.app.mvp.MvpBasePresenter;
 import ru.vasiliev.sandbox.visionlabs.data.VisionLabsPreferences;
 import ru.vasiliev.sandbox.visionlabs.data.VisionLabsRegistrationApi;
 import ru.vasiliev.sandbox.visionlabs.data.VisionLabsRegistrationApiLocalImpl;

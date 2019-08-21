@@ -1,11 +1,10 @@
-package ru.vasiliev.sandbox.di.components;
+package ru.vasiliev.sandbox.app.di;
 
 import dagger.Component;
 import ru.vasiliev.sandbox.App;
-import ru.vasiliev.sandbox.di.modules.AppModule;
-import ru.vasiliev.sandbox.di.modules.LocationModule;
-import ru.vasiliev.sandbox.di.scopes.AppScope;
+import ru.vasiliev.sandbox.location.di.LocationModule;
 import ru.vasiliev.sandbox.location.LocationServices;
+import ru.vasiliev.sandbox.visionlabs.di.VisionLabsComponent;
 
 /**
  * Date: 06.07.2019

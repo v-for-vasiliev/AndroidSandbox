@@ -1,9 +1,9 @@
-package ru.vasiliev.sandbox;
+package ru.vasiliev.sandbox.app;
 
 import android.support.annotation.NonNull;
 
-import ru.vasiliev.sandbox.di.components.AppComponent;
-import ru.vasiliev.sandbox.di.components.VisionLabsComponent;
+import ru.vasiliev.sandbox.app.di.AppComponent;
+import ru.vasiliev.sandbox.visionlabs.di.VisionLabsComponent;
 
 public class ComponentManager {
 
