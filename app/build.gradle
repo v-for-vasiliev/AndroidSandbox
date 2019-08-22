@@ -27,6 +27,7 @@ android {
         buildConfigField "long", "OKHTTP_CONNECT_TIMEOUT_SEC", "15"
         buildConfigField "long", "OKHTTP_READ_TIMEOUT_SEC", "30"
         buildConfigField "long", "OKHTTP_WRITE_TIMEOUT_SEC", "30"
+        buildConfigField "String", "NETWORK_TRACE_STATE", "\"release\""
         // Location
         buildConfigField "String", "LOCATION_PROVIDER_TYPE", "\"legacy\""
         buildConfigField "long", "LOCATION_UPDATE_INTERVAL_MS", "5000"

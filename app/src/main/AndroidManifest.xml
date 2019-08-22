@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.FLASHLIGHT" />
 
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <application
             android:name=".App"
             android:allowBackup="true"
@@ -37,6 +38,7 @@
 
         <activity android:name=".visionlabs.presentation.VisionLabsActivity"
                   android:theme="@style/AppTheme.NoActionBar"/>
+        <activity android:name=".sovestoauth.presentation.OAuthActivity"/>
     </application>
 
 </manifest>
