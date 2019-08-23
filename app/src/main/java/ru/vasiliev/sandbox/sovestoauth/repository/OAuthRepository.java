@@ -8,8 +8,6 @@ public class OAuthRepository {
 
     private OAuthApi mOAuthApi;
 
-    private String mRefreshToken;
-
     public OAuthRepository(OAuthApi api) {
         mOAuthApi = api;
     }

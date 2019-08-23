@@ -18,8 +18,8 @@ public class AppModule {
 
     private final App mApp;
 
-    public AppModule(@NonNull App appContext) {
-        mApp = appContext;
+    public AppModule(@NonNull App app) {
+        mApp = app;
     }
 
     @AppScope

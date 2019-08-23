@@ -3,9 +3,6 @@ package ru.vasiliev.sandbox;
 import android.app.Application;
 
 import ru.vasiliev.sandbox.app.ComponentManager;
-import ru.vasiliev.sandbox.app.di.AppComponent;
-import ru.vasiliev.sandbox.app.di.module.AppModule;
-import ru.vasiliev.sandbox.app.di.DaggerAppComponent;
 import timber.log.Timber;
 
 /**
@@ -29,10 +26,7 @@ public class App extends Application {
 
     private void init() {
         // Dagger application component
-        AppComponent appComponent = DaggerAppComponent.builder().appModule(new AppModule(this))
-                .build();
-
-        sComponentManager = new ComponentManager(appComponent);
+        sComponentManager = new ComponentManager(sInstance);
 
         Timber.plant(new Timber.DebugTree());
     }

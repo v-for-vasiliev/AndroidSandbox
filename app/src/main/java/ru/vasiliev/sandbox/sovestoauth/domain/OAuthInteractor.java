@@ -10,16 +10,19 @@ public class OAuthInteractor {
 
     private App mApp;
 
+    private String mRefreshToken;
+
     public OAuthInteractor(OAuthRepository repository, App app) {
         mOAuthRepository = repository;
         mApp = app;
     }
 
-    public boolean auth() {
+    public boolean auth(String phone) {
         String fingerprint = DeviceUtils.generateFingerprint(mApp);
         if (fingerprint == null) {
             return false;
         }
-        mOAuthRepository.
+        mOAuthRepository.getSms("code", phone, DeviceUtils.generateFingerprint(mApp));
+        return true;
     }
 }

@@ -1,5 +1,8 @@
 package ru.vasiliev.sandbox.sovestoauth.presentation;
 
+import com.arellomobile.mvp.MvpAppCompatActivity;
+import com.tbruyelle.rxpermissions.RxPermissions;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -11,7 +14,7 @@ import butterknife.ButterKnife;
 import ru.vasiliev.sandbox.R;
 import rx.subscriptions.CompositeSubscription;
 
-public class OAuthActivity extends AppCompatActivity {
+public class OAuthActivity extends MvpAppCompatActivity {
 
     private CompositeSubscription mSubscriptions = new CompositeSubscription();
 
@@ -33,5 +36,9 @@ public class OAuthActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         mSubscriptions.clear();
+    }
+
+    void requestPermissions() {
+        //RxPermissions.getInstance(this).request()
     }
 }

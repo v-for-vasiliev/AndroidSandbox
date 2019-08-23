@@ -8,12 +8,9 @@ import dagger.Provides;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import ru.vasiliev.sandbox.BuildConfig;
+import ru.vasiliev.sandbox.app.di.AppScope;
 import ru.vasiliev.sandbox.network.ClientFactory;
 import ru.vasiliev.sandbox.network.RetrofitFactory;
-
-/**
- * Created by vasiliev on 11/02/2018.
- */
 
 @Module
 public class NetworkModule {
@@ -25,20 +22,20 @@ public class NetworkModule {
     }
 
     @Named("release")
-    @Singleton
+    @AppScope
     @Provides
     public OkHttpClient provideNetworkClient() {
         return ClientFactory.getDefaultOkHttpClient();
     }
 
     @Named("debug")
-    @Singleton
+    @AppScope
     @Provides
     public OkHttpClient getDefaultClientWithStetho() {
         return ClientFactory.getOkHttpClientWithStetho();
     }
 
-    @Singleton
+    @AppScope
     @Provides
     public Retrofit provideRetrofit(@Named(BuildConfig.NETWORK_TRACE_STATE) OkHttpClient client) {
         return RetrofitFactory.getRetrofit(mBaseUrl, client);
