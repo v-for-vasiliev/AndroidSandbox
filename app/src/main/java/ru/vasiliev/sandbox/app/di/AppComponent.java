@@ -3,8 +3,11 @@ package ru.vasiliev.sandbox.app.di;
 import dagger.Component;
 import ru.vasiliev.sandbox.App;
 import ru.vasiliev.sandbox.app.di.module.AppModule;
+import ru.vasiliev.sandbox.app.di.module.NetworkModule;
 import ru.vasiliev.sandbox.location.LocationServices;
 import ru.vasiliev.sandbox.location.di.LocationModule;
+import ru.vasiliev.sandbox.sovestoauth.di.OAuthComponent;
+import ru.vasiliev.sandbox.sovestoauth.di.OAuthModule;
 import ru.vasiliev.sandbox.visionlabs.di.VisionLabsComponent;
 
 /**
@@ -13,7 +16,7 @@ import ru.vasiliev.sandbox.visionlabs.di.VisionLabsComponent;
  * @author Kirill Vasiliev
  */
 @AppScope
-@Component(modules = {AppModule.class, LocationModule.class})
+@Component(modules = {AppModule.class, NetworkModule.class, LocationModule.class})
 public interface AppComponent {
 
     App getApp();
@@ -21,4 +24,6 @@ public interface AppComponent {
     LocationServices getLocationServices();
 
     VisionLabsComponent plusVisionLabsComponent();
+
+    OAuthComponent plusOAuthComponent(OAuthModule oAuthModule);
 }

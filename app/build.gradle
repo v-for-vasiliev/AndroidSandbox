@@ -32,6 +32,10 @@ android {
         buildConfigField "String", "LOCATION_PROVIDER_TYPE", "\"legacy\""
         buildConfigField "long", "LOCATION_UPDATE_INTERVAL_MS", "5000"
         buildConfigField "long", "LOCATION_FASTEST_UPDATE_INTERVAL_MS", "2500"
+        // Sovest API
+        buildConfigField "String", "API_ENDPOINT", "\"https://api-test.sovest.com/\""
+        buildConfigField "String", "API_OAUTH_ENDPOINT", "\"https://oauth-test.sovest.com/\""
+        buildConfigField "String", "AUTH_HEADER_VALUE", "\"Basic dGVzdF9kc2FfcGFydG5lcjoqKioq\""
     }
 
     buildTypes {

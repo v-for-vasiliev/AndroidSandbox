@@ -1,13 +1,17 @@
 package ru.vasiliev.sandbox.sovestoauth.di;
 
-import dagger.Component;
-import ru.vasiliev.sandbox.app.di.AppScope;
-import ru.vasiliev.sandbox.app.di.module.NetworkModule;
+import dagger.Subcomponent;
 import ru.vasiliev.sandbox.sovestoauth.domain.OAuthInteractor;
+import ru.vasiliev.sandbox.sovestoauth.domain.model.CredentialsStorage;
+import ru.vasiliev.sandbox.sovestoauth.presentation.OAuthPresenter;
 
-@AppScope
-@Component(modules = {NetworkModule.class, OAuthModule.class})
+@OAuthScope
+@Subcomponent(modules = {OAuthModule.class})
 public interface OAuthComponent {
 
     OAuthInteractor getOAuthInteractor();
+
+    CredentialsStorage getCredentialStorage();
+
+    void inject(OAuthPresenter oAuthPresenter);
 }
