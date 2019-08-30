@@ -35,6 +35,8 @@ android {
         // Sovest API
         buildConfigField "String", "API_ENDPOINT", "\"https://api-test.sovest.com/\""
         buildConfigField "String", "API_OAUTH_ENDPOINT", "\"https://oauth-test.sovest.com/\""
+        buildConfigField "String", "API_UPDATE_CERTIFICATE_ENDPOINT",
+                "\"https://update-security1.qiwi.com\""
         buildConfigField "String", "AUTH_HEADER_VALUE", "\"Basic dGVzdF9kc2FfcGFydG5lcjoqKioq\""
     }
 

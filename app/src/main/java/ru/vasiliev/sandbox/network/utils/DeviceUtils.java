@@ -1,4 +1,4 @@
-package ru.vasiliev.sandbox.sovestoauth.utils;
+package ru.vasiliev.sandbox.network.utils;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

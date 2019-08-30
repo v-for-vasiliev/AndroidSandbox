@@ -7,8 +7,8 @@ import ru.vasiliev.sandbox.BuildConfig;
 import ru.vasiliev.sandbox.app.di.AppComponent;
 import ru.vasiliev.sandbox.app.di.DaggerAppComponent;
 import ru.vasiliev.sandbox.app.di.module.AppModule;
-import ru.vasiliev.sandbox.sovestoauth.di.OAuthComponent;
-import ru.vasiliev.sandbox.sovestoauth.di.OAuthModule;
+import ru.vasiliev.sandbox.network.di.NetworkComponent;
+import ru.vasiliev.sandbox.network.di.module.OAuthModule;
 import ru.vasiliev.sandbox.visionlabs.di.VisionLabsComponent;
 
 public class ComponentManager {
@@ -19,12 +19,12 @@ public class ComponentManager {
 
     private VisionLabsComponent mVisionLabsComponent;
 
-    private OAuthComponent mOAuthComponent;
+    private NetworkComponent mNetworkComponent;
 
     public ComponentManager(@NonNull App app) {
         mApp = app;
         mAppComponent = DaggerAppComponent.builder().appModule(new AppModule(mApp)).build();
-        mOAuthComponent = mAppComponent
+        mNetworkComponent = mAppComponent
                 .plusOAuthComponent(new OAuthModule(BuildConfig.API_OAUTH_ENDPOINT));
     }
 
@@ -32,8 +32,8 @@ public class ComponentManager {
         return mAppComponent;
     }
 
-    public OAuthComponent getOAuthComponent() {
-        return mOAuthComponent;
+    public NetworkComponent getNetworkComponent() {
+        return mNetworkComponent;
     }
 
     public synchronized VisionLabsComponent getVisionLabsComponent() {

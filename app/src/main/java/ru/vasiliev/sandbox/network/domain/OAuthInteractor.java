@@ -1,13 +1,13 @@
-package ru.vasiliev.sandbox.sovestoauth.domain;
+package ru.vasiliev.sandbox.network.domain;
 
 import org.joda.time.DateTime;
 
 import io.reactivex.Observable;
 import ru.vasiliev.sandbox.App;
-import ru.vasiliev.sandbox.sovestoauth.domain.model.CredentialsStorage;
-import ru.vasiliev.sandbox.sovestoauth.domain.model.OAuthResponse;
-import ru.vasiliev.sandbox.sovestoauth.repository.OAuthRepository;
-import ru.vasiliev.sandbox.sovestoauth.utils.DeviceUtils;
+import ru.vasiliev.sandbox.network.domain.model.CredentialsStorage;
+import ru.vasiliev.sandbox.network.domain.model.OAuthResponse;
+import ru.vasiliev.sandbox.network.repository.OAuthRepository;
+import ru.vasiliev.sandbox.network.utils.DeviceUtils;
 
 public class OAuthInteractor {
 
@@ -31,14 +31,14 @@ public class OAuthInteractor {
         }
         return mOAuthRepository.getSms("code", phone, fingerprint).doOnNext(oAuthResponse -> {
             mCredentialsStorage.setPhone(phone);
-            mCredentialsStorage.setConfirmationKey(oAuthResponse.getCode());
+            mCredentialsStorage.setConfirmationCode(oAuthResponse.getConfirmationCode());
             mCredentialsStorage.setFingerprint(fingerprint);
         });
     }
 
     public Observable<OAuthResponse> submitSms(String code) {
         return mOAuthRepository.submitSms("urn:qiwi:oauth:grant-type:vcode",
-                mCredentialsStorage.getConfirmationKey(), code).doOnNext(oAuthResponse -> {
+                mCredentialsStorage.getConfirmationCode(), code).doOnNext(oAuthResponse -> {
             mCredentialsStorage.setRefreshToken(oAuthResponse.getRefreshToken());
             mCredentialsStorage.setAccessToken(oAuthResponse.getAccessToken());
             try {

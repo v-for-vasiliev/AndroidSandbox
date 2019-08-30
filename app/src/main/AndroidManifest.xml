@@ -40,7 +40,7 @@
         <activity android:name=".visionlabs.presentation.VisionLabsActivity"
                   android:theme="@style/AppTheme.NoActionBar"/>
 
-        <activity android:name=".sovestoauth.presentation.OAuthActivity"
+        <activity android:name=".network.presentation.OAuthActivity"
                   android:theme="@style/AppTheme.NoActionBar"/>
 
         <service android:name=".app.AppTaskWatchDog" android:stopWithTask="false"/>

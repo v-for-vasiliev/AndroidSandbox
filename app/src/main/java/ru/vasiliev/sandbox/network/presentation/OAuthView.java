@@ -1,4 +1,4 @@
-package ru.vasiliev.sandbox.sovestoauth.presentation;
+package ru.vasiliev.sandbox.network.presentation;
 
 import com.arellomobile.mvp.MvpView;
 import com.arellomobile.mvp.viewstate.strategy.AddToEndSingleStrategy;

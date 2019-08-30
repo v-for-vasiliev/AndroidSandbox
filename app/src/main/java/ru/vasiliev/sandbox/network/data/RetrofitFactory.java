@@ -1,4 +1,4 @@
-package ru.vasiliev.sandbox.network;
+package ru.vasiliev.sandbox.network.data;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;

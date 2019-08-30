@@ -11,7 +11,7 @@ import android.view.View;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import ru.vasiliev.sandbox.location.presentation.LocationActivity;
-import ru.vasiliev.sandbox.sovestoauth.presentation.OAuthActivity;
+import ru.vasiliev.sandbox.network.presentation.OAuthActivity;
 import ru.vasiliev.sandbox.visionlabs.presentation.VisionLabsActivity;
 
 /**

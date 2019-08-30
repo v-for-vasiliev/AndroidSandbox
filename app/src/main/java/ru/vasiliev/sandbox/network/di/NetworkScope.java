@@ -1,4 +1,4 @@
-package ru.vasiliev.sandbox.sovestoauth.di;
+package ru.vasiliev.sandbox.network.di;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -12,6 +12,6 @@ import javax.inject.Scope;
  */
 @Scope
 @Retention(RetentionPolicy.RUNTIME)
-public @interface OAuthScope {
+public @interface NetworkScope {
 
 }

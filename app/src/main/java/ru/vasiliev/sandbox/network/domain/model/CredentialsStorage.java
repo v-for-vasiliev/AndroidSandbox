@@ -1,4 +1,4 @@
-package ru.vasiliev.sandbox.sovestoauth.domain.model;
+package ru.vasiliev.sandbox.network.domain.model;
 
 import org.joda.time.DateTime;
 
@@ -12,7 +12,7 @@ public class CredentialsStorage {
 
     private String mPhone;
 
-    private String mConfirmationKey;
+    private String mConfirmationCode;
 
     private String mAccessToken;
 
@@ -36,12 +36,12 @@ public class CredentialsStorage {
         mPhone = phone;
     }
 
-    public String getConfirmationKey() {
-        return mConfirmationKey;
+    public String getConfirmationCode() {
+        return mConfirmationCode;
     }
 
-    public void setConfirmationKey(String confirmationKey) {
-        mConfirmationKey = confirmationKey;
+    public void setConfirmationCode(String confirmationCode) {
+        mConfirmationCode = confirmationCode;
     }
 
     public String getAccessToken() {
@@ -70,5 +70,14 @@ public class CredentialsStorage {
 
     public boolean isRefreshTokenExpired() {
         return mRefreshTokenExpirationTime != null && mRefreshTokenExpirationTime.isBeforeNow();
+    }
+
+    public void reset() {
+        mFingerprint = null;
+        mPhone = null;
+        mConfirmationCode = null;
+        mAccessToken = null;
+        mRefreshToken = null;
+        mRefreshTokenExpirationTime = null;
     }
 }

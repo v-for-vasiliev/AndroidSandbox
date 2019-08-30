@@ -1,10 +1,10 @@
-package ru.vasiliev.sandbox.sovestoauth.repository.datasource;
+package ru.vasiliev.sandbox.network.repository.datasource;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
-import ru.vasiliev.sandbox.sovestoauth.domain.model.OAuthResponse;
+import ru.vasiliev.sandbox.network.domain.model.OAuthResponse;
 
 public interface OAuthApi {
 
@@ -16,7 +16,7 @@ public interface OAuthApi {
     @FormUrlEncoded
     @POST("oauth/token")
     Observable<OAuthResponse> submitSms(@Field("grant_type") String responseType,
-            @Field("code") String code, @Field("vcode") String vcode);
+            @Field("code") String confirmationKey, @Field("vcode") String vcode);
 
     @FormUrlEncoded
     @POST("oauth/token")

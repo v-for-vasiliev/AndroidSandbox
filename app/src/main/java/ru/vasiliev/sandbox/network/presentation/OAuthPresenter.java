@@ -1,4 +1,4 @@
-package ru.vasiliev.sandbox.sovestoauth.presentation;
+package ru.vasiliev.sandbox.network.presentation;
 
 import com.arellomobile.mvp.InjectViewState;
 
@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import ru.vasiliev.sandbox.App;
 import ru.vasiliev.sandbox.app.mvp.MvpBasePresenter;
 import ru.vasiliev.sandbox.app.utils.RxUtils;
-import ru.vasiliev.sandbox.sovestoauth.domain.OAuthInteractor;
+import ru.vasiliev.sandbox.network.domain.OAuthInteractor;
 
 @InjectViewState
 public class OAuthPresenter extends MvpBasePresenter<OAuthView> {
@@ -18,7 +18,7 @@ public class OAuthPresenter extends MvpBasePresenter<OAuthView> {
     private boolean mSmsCodeRequested = false;
 
     public OAuthPresenter() {
-        App.getComponentManager().getOAuthComponent().inject(this);
+        App.getComponentManager().getNetworkComponent().inject(this);
     }
 
     @Override
