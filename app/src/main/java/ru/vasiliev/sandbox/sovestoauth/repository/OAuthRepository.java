@@ -1,8 +1,8 @@
 package ru.vasiliev.sandbox.sovestoauth.repository;
 
+import io.reactivex.Observable;
 import ru.vasiliev.sandbox.sovestoauth.domain.model.OAuthResponse;
 import ru.vasiliev.sandbox.sovestoauth.repository.datasource.OAuthApi;
-import rx.Observable;
 
 public class OAuthRepository {
 

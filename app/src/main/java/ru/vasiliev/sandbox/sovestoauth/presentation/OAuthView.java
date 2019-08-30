@@ -8,4 +8,6 @@ import com.arellomobile.mvp.viewstate.strategy.StateStrategyType;
 public interface OAuthView extends MvpView {
 
     void requestPermissions();
+
+    void onSmsRequestedSuccessfully();
 }

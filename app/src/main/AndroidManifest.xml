@@ -13,6 +13,7 @@
     <uses-permission android:name="android.permission.FLASHLIGHT"/>
 
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+
     <application
             android:name=".App"
             android:allowBackup="true"
@@ -38,7 +39,9 @@
 
         <activity android:name=".visionlabs.presentation.VisionLabsActivity"
                   android:theme="@style/AppTheme.NoActionBar"/>
-        <activity android:name=".sovestoauth.presentation.OAuthActivity"/>
+
+        <activity android:name=".sovestoauth.presentation.OAuthActivity"
+                  android:theme="@style/AppTheme.NoActionBar"/>
 
         <service android:name=".app.AppTaskWatchDog" android:stopWithTask="false"/>
     </application>

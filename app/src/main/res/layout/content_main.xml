@@ -33,4 +33,12 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/location"/>
 
+    <Button android:id="@+id/oauth"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="OAuth"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/vision_labs"/>
+
 </android.support.constraint.ConstraintLayout>

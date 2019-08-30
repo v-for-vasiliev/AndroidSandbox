@@ -1,10 +1,10 @@
 package ru.vasiliev.sandbox.sovestoauth.repository.datasource;
 
+import io.reactivex.Observable;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 import ru.vasiliev.sandbox.sovestoauth.domain.model.OAuthResponse;
-import rx.Observable;
 
 public interface OAuthApi {
 

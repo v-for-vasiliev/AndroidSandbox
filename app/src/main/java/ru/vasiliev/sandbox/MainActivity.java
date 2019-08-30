@@ -10,8 +10,8 @@ import android.view.View;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import ru.vasiliev.sandbox.R;
 import ru.vasiliev.sandbox.location.presentation.LocationActivity;
+import ru.vasiliev.sandbox.sovestoauth.presentation.OAuthActivity;
 import ru.vasiliev.sandbox.visionlabs.presentation.VisionLabsActivity;
 
 /**
@@ -21,7 +21,7 @@ import ru.vasiliev.sandbox.visionlabs.presentation.VisionLabsActivity;
  */
 public class MainActivity extends AppCompatActivity {
 
-    @OnClick({R.id.location, R.id.vision_labs, R.id.app_settings})
+    @OnClick({R.id.location, R.id.vision_labs, R.id.app_settings, R.id.oauth})
     void onClick(View view) {
         switch (view.getId()) {
             case R.id.app_settings:
@@ -32,6 +32,9 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.vision_labs:
                 VisionLabsActivity.start(this);
+                break;
+            case R.id.oauth:
+                OAuthActivity.start(this);
                 break;
             default:
                 break;

@@ -1,32 +1,32 @@
 package ru.vasiliev.sandbox.sovestoauth.domain.model;
 
+import org.joda.time.DateTime;
+
 public class CredentialsStorage {
 
     public CredentialsStorage() {
 
     }
 
+    private String mFingerprint;
+
     private String mPhone;
 
-    private String mFirstName;
-
-    private String mLastName;
-
-    private String mMiddleName;
-
-    private String mUserID;
-
-    private String mTokenCode;
+    private String mConfirmationKey;
 
     private String mAccessToken;
 
     private String mRefreshToken;
 
-    private String mConfirmationKey;
+    private DateTime mRefreshTokenExpirationTime;
 
-    private String mAuthUserId;
+    public String getFingerprint() {
+        return mFingerprint;
+    }
 
-    private String mFingerprint;
+    public void setFingerprint(String fingerprint) {
+        mFingerprint = fingerprint;
+    }
 
     public String getPhone() {
         return mPhone;
@@ -36,44 +36,12 @@ public class CredentialsStorage {
         mPhone = phone;
     }
 
-    public String getFirstName() {
-        return mFirstName;
+    public String getConfirmationKey() {
+        return mConfirmationKey;
     }
 
-    public void setFirstName(String firstName) {
-        mFirstName = firstName;
-    }
-
-    public String getLastName() {
-        return mLastName;
-    }
-
-    public void setLastName(String lastName) {
-        mLastName = lastName;
-    }
-
-    public String getMiddleName() {
-        return mMiddleName;
-    }
-
-    public void setMiddleName(String middleName) {
-        mMiddleName = middleName;
-    }
-
-    public String getUserID() {
-        return mUserID;
-    }
-
-    public void setUserID(String userID) {
-        mUserID = userID;
-    }
-
-    public String getTokenCode() {
-        return mTokenCode;
-    }
-
-    public void setTokenCode(String tokenCode) {
-        mTokenCode = tokenCode;
+    public void setConfirmationKey(String confirmationKey) {
+        mConfirmationKey = confirmationKey;
     }
 
     public String getAccessToken() {
@@ -92,27 +60,15 @@ public class CredentialsStorage {
         mRefreshToken = refreshToken;
     }
 
-    public String getConfirmationKey() {
-        return mConfirmationKey;
+    public DateTime getRefreshTokenExpirationTime() {
+        return mRefreshTokenExpirationTime;
     }
 
-    public void setConfirmationKey(String confirmationKey) {
-        mConfirmationKey = confirmationKey;
+    public void setRefreshTokenExpirationTime(DateTime refreshTokenExpirationTime) {
+        mRefreshTokenExpirationTime = refreshTokenExpirationTime;
     }
 
-    public String getAuthUserId() {
-        return mAuthUserId;
-    }
-
-    public void setAuthUserId(String authUserId) {
-        mAuthUserId = authUserId;
-    }
-
-    public String getFingerprint() {
-        return mFingerprint;
-    }
-
-    public void setFingerprint(String fingerprint) {
-        mFingerprint = fingerprint;
+    public boolean isRefreshTokenExpired() {
+        return mRefreshTokenExpirationTime != null && mRefreshTokenExpirationTime.isBeforeNow();
     }
 }
